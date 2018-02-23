@@ -1,0 +1,18 @@
+Find source of the following data:
+- age related crime listing
+- 311
+- 911: https://data.baltimorecity.gov/Public-Safety/911-Police-Calls-for-Service/xviu-ezkt
+- #food retail services
+- transportation coverage in the neighborhood
+- education levels
+- homelessness
+- ownership levels
+- wifi hotspots
+- recreation centers
+- liquor stores licenses
+- inspection results
+        - Housing permits: https://data.baltimorecity.gov/Housing-Development/Housing-Permits/fesm-tgxf
+- location of security cameras
+        - fixed speed camera: https://data.baltimorecity.gov/Transportation/Fixed-Speed-Cameras/aqgr-xx9h
+        - Red Light Cameras: https://data.baltimorecity.gov/Transportation/Red-Light-Cameras/ydjd-febd
+        - CCTV Locations: https://data.baltimorecity.gov/Public-Safety/CCTV-Locations/hdyb-27ak
