@@ -1,11 +1,19 @@
 Find source of the following data:
 - age related crime listing
-- 311
+- 311: https://data.baltimorecity.gov/City-Services/311-Customer-Service-Requests/9agw-sxsr
 - 911: https://data.baltimorecity.gov/Public-Safety/911-Police-Calls-for-Service/xviu-ezkt
 - #food retail services
+	- Baltimore City Farmers Markets (20 rows): https://data.baltimorecity.gov/Health/Baltimore-City-Farmers-Markets/atzp-3tnt
+	- Grocery Stores (44 rows * 7 cols, not complete): https://data.baltimorecity.gov/Health/Grocery-Stores/uuwk-975y
+	- Restaurants (1327 rows * 6 cols, accuracy and completeness unknown): https://data.baltimorecity.gov/Culture-Arts/Restaurants/k5ry-ef3g
+	- Street Food Vendors Locations (77 rows * 8 cols): https://data.baltimorecity.gov/dataset/Food-Vendor-Locations/bqw3-z52q
 - transportation coverage in the neighborhood
+	- Bike Lanes (1631 rows * 9 cols, no coordinates): https://data.baltimorecity.gov/Transportation/Bike-Lanes/xzfj-gyms
 - education levels
+	- Education and Youth (2010-2013) (56 rows * 112 cols, 111 indicators for 56 neighbourhoods, no coordinate): https://data.baltimorecity.gov/Neighborhoods/Education-and-Youth-2010-2013-/f9ua-ivaj
 - homelessness
+	- Homeless Services (31 rows * 22 cols): https://data.baltimorecity.gov/Health/Homeless-Services/uukz-aw5g
+	- Homeless Shelters (40 rows * 7 cols, has address, no coordinates): https://data.baltimorecity.gov/Health/Homeless-Shelters/hyq3-8sxr
 - ownership levels
 - wifi hotspots
 - recreation centers
