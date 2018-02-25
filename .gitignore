@@ -140,3 +140,4 @@ $RECYCLE.BIN/
 
 
 # custom
+data/open-baltimore/raw/*.csv
