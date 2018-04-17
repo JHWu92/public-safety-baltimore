@@ -108,9 +108,14 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
 
     return clean
 
+
 import datetime
 
+
 class KDE:
+    def __str__(self):
+        return 'KDE(bandwidth={}, timewindow={}, verbose={})'.format(self.bw, self.tw, self.verbose)
+
     def __init__(self, bw=1, tw=60, verbose=0):
         """
 
@@ -123,7 +128,6 @@ class KDE:
         self.bw = bw
         self.tw = tw
         self.estimator = None
-        pass
 
     def fit(self, coords, last_date=None):
         """
@@ -136,11 +140,11 @@ class KDE:
             if last_date is None:
                 last_date = coords.index.max()
             elif isinstance(last_date, str):
-                last_date = datetime.datetime.strptime(last_date, format='%Y-%m-%d')
+                last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d')
             # pandas time index slice include both begin and last date,
             # to have a time window=tw, the difference should be tw-1
-            begin_date = last_date - datetime.timedelta(days=self.tw-1)
-            coords = coords.loc[begin_date, last_date]
+            begin_date = last_date - datetime.timedelta(days=self.tw - 1)
+            coords = coords.loc[begin_date:last_date]
 
         kde = KernelDensity(bandwidth=self.bw)
         kde.fit(coords.tolist())
@@ -154,7 +158,7 @@ class KDE:
         pdf = pd.Series(pdf, index=data.index)
         return pdf
 
-    def tune(self, coords, bw_choice=None, cv=20):
+    def tune(self, coords, bw_choice=None, cv=20, n_jobs=1):
         """
         Bandwidth is estimated by gridsearchCV
         :param coords: coords for bw estimation
@@ -162,11 +166,17 @@ class KDE:
         :param cv: default 20
         """
         if isinstance(coords, pd.Series):
+            if self.verbose > 0: print('converting pd.Series to list')
             coords = coords.tolist()
 
         if bw_choice is None:
+            if self.verbose > 0: print('use default bw_choice')
             bw_choice = np.linspace(10, 1000, 30)
-        search = GridSearchCV(KernelDensity(), {'bandwidth': bw_choice}, cv=cv)
+        if self.verbose>0 : print(str(bw_choice))
+
+        if self.verbose > 0: print('gridsearching bw')
+        search = GridSearchCV(KernelDensity(), {'bandwidth': bw_choice}, cv=cv, verbose=self.verbose, n_jobs=n_jobs)
         search.fit(coords)
+
         if self.verbose > 0: print('best parameters:', search.best_params_)
         self.bw = search.best_params_['bandwidth']
