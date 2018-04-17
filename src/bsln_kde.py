@@ -147,6 +147,9 @@ class KDE:
         if self.tw is not None:
             if last_date is None:
                 last_date = coords.index.max()
+                if self.verbose>0:
+                    print('last_date is None, using coords.index.max()=%s as last_date' % (
+                        last_date.strftime('%Y-%m-%d')))
             elif isinstance(last_date, str):
                 last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d')
             # pandas time index slice include both begin and last date,
