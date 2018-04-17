@@ -1,7 +1,7 @@
 # Author: Jiahui Wu
 
 import datetime
-
+from .xy_gen import y_cnt_event
 
 class TM_ROLLER:
 
@@ -66,11 +66,18 @@ class TM_ROLLER:
             tw_sd += datetime.timedelta(days=self.step)
 
 
-    def eval(self, metric):
+    def eval(self, metric, sp_units):
         """
 
         metric:
 
         """
-
-        pass
+        # TODO multiple metrics
+        result = {}
+        for r in self.__rolling():
+            self.method.fit(r['train'], last_date=r['train_ed'])
+            pred = self.method.estimator.pred(sp_units['cen_coords'])
+            y = y_cnt_event(sp_units, r['test'])
+            eval_pred = metric(pred, y)
+            result['%s~%s' % (r['tw_sd'].strftime('%Y-%m-%d'), r['tw_ed'].strftime('%Y-%m-%d'))] = eval_pred
+        return result
