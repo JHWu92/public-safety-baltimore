@@ -9,5 +9,6 @@ def hit_rate(grids_risk, grids_y):
     idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
     rank = grids_risk.sort_values(ascending=False).index
     hit = grids_y.loc[rank].cumsum()/grids_y.sum()
-    return hit.iloc[idx_for_auc].values
-
+    auc = hit.iloc[idx_for_auc]
+    auc.index = ['%d0%%' % (i+1) for i in range(10)]
+    return auc
