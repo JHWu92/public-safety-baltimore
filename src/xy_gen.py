@@ -1,14 +1,14 @@
 import geopandas as gp
 from shapely.geometry import Point
 
-def y_cnt_event(spatial_units, events):
+def y_cnt_event(spatial_units, coords):
     """
 
     :param spatial_units: gp.GeoDataFrame
-    :param events: pd.Series of coords, the coords should be in the same crs of spatial units
+    :param coords: pd.Series of coords, the coords should be in the same crs of spatial units
     :return:
     """
-    events = gp.GeoDataFrame(events.apply(lambda x: Point(*x))).rename(columns={'coords': 'geometry'}).reset_index()
+    events = gp.GeoDataFrame(coords.apply(lambda x: Point(*x))).rename(columns={'coords': 'geometry'}).reset_index()
     while events.crs is None and spatial_units.crs is not None:
         events.crs = spatial_units.crs
     joined = gp.sjoin(events, spatial_units)
