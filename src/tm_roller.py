@@ -43,7 +43,7 @@ class TM_ROLLER:
         if self.data is None: raise ValueError('set data first')
 
         dates = self.data.index.unique()
-        eval_dates = dates[(dates >= '2013-02-01') & (dates <= '2013-03-01')]
+        eval_dates = dates[(dates >= self.sd) & (dates <= self.ed)]
 
         # TODO: detailed check for date, tw, sd, ed, num_experiment
         if len(dates) <= self.tw:
@@ -55,15 +55,23 @@ class TM_ROLLER:
             print('total number of experiment:', num_experiment)
 
         tw_sd = self.sd
+        num_loops = 1
         while tw_sd <= self.ed:
             # pandas time index slice include both begin and last date,
             # to have a time window=tw, the difference should be tw-1
             tw_ed = tw_sd + datetime.timedelta(days=self.tw - 1)
             train_ed = tw_sd - datetime.timedelta(days=1)
+            if self.verbose > 0:
+                if self.verbose == 1 and num_loops % 10!=0:
+                    pass
+                print('No.%d exp, testing period: %s ~ %s' %(
+                    num_loops, tw_sd.strftime('%Y-%m-%d'), tw_ed.strftime('%Y-%m-%d')))
+
             train = self.data.loc[:train_ed]
             test = self.data.loc[tw_sd: tw_ed]
             yield {'train': train, 'test': test, 'tw_sd': tw_sd, 'tw_ed': tw_ed, 'train_ed': train_ed}
             tw_sd += datetime.timedelta(days=self.step)
+            num_loops+=1
 
     def eval(self, metric, sp_units):
         """
