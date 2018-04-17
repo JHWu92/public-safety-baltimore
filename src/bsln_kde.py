@@ -1,6 +1,8 @@
 # Author: Jiahui Wu <jeffwu@terpmail.umd.edu>
 
 
+import datetime
+
 import geopandas as gp
 import numpy as np
 import pandas as pd
@@ -52,6 +54,8 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
         if to_epsg is not None, the coords would be transformed from from_epsg to to_epsg
 
     """
+
+    # Loading raw
     if isinstance(raw, str):
         if raw.endswith('.geojson') or raw.endswith('.shp'):
             raw = gp.read_file(raw)
@@ -60,8 +64,10 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
         else:
             raise ValueError('raw_path=%s, this type of file is not supported' % raw)
 
-    if not col_date in raw.columns: raise ValueError('date column %s is not in columns' % col_date)
+    # make sure data has column of date
+    if col_date not in raw.columns: raise ValueError('date column %s is not in columns' % col_date)
 
+    # keep row with coords
     if verbose > 0: print('remove rows w/o coords')
     if 'geometry' in raw.columns:
         # assuming each row has a valid geometry
@@ -74,6 +80,7 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
     else:
         raise ValueError('No coordinate column(s) is provided')
 
+    # get coords Series
     if verbose > 0: print('get coords Series')
     if 'geometry' in clean.columns:
         clean['coords'] = clean.geometry.apply(lambda x: x.coords[0])
@@ -82,6 +89,7 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
     elif col_coords is not None:
         pass
 
+    # convert to to_epsg
     if verbose > 0:
         print('project to the to_epsg if specified', to_epsg)
     if to_epsg is not None:
@@ -92,11 +100,14 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
         lons, lats = transform(from_proj, to_proj, lons, lats)
         clean['coords'] = list(zip(lons, lats))
 
+    # clean date column
     if verbose > 0:
-        print('sort data by date')
-    clean[col_date] = pd.to_datetime(clean[col_date], format=date_format)
-    clean = clean.reset_index().set_index(col_date).sort_index()
+        print('sort data by date, set col_date from "%s" to "Date"' % col_date)
+    clean.rename(columns={col_date: 'Date'}, inplace=True)
+    clean['Date'] = pd.to_datetime(clean['Date'], format=date_format)
+    clean = clean.reset_index().set_index('Date').sort_index()
 
+    # clean types of data
     if verbose > 0:
         print('keep targeted types of data if col_type is specified', col_type)
     if col_type is not None:
@@ -107,9 +118,6 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
         clean = clean[clean[col_type].isin(keep_types)]
 
     return clean
-
-
-import datetime
 
 
 class KDE:
@@ -172,7 +180,7 @@ class KDE:
         if bw_choice is None:
             if self.verbose > 0: print('use default bw_choice')
             bw_choice = np.linspace(10, 1000, 30)
-        if self.verbose>0 : print(str(bw_choice))
+        if self.verbose > 0: print(str(bw_choice))
 
         if self.verbose > 0: print('gridsearching bw')
         search = GridSearchCV(KernelDensity(), {'bandwidth': bw_choice}, cv=cv, verbose=self.verbose, n_jobs=n_jobs)
