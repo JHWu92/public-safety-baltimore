@@ -83,6 +83,7 @@ class TM_ROLLER:
         result = {}
         for r in self.__rolling():
             self.method.fit(r['train'], last_date=r['train_ed'])
+            # TODO allow diverse parameters for pred
             pred = self.method.pred(sp_units['cen_coords'])
             y = y_cnt_event(sp_units, r['test'])
             eval_pred = metric(pred, y)
