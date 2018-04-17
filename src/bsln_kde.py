@@ -60,6 +60,8 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
         else:
             raise ValueError('raw_path=%s, this type of file is not supported' % raw)
 
+    if not col_date in raw.columns: raise ValueError('date column %s is not in columns' % col_date)
+
     if verbose > 0: print('remove rows w/o coords')
     if 'geometry' in raw.columns:
         # assuming each row has a valid geometry
@@ -159,6 +161,9 @@ class KDE:
         :param bw_choice: list-like, default np.linspace(10, 1000, 30)
         :param cv: default 20
         """
+        if isinstance(coords, pd.Series):
+            coords = coords.tolist()
+
         if bw_choice is None:
             bw_choice = np.linspace(10, 1000, 30)
         search = GridSearchCV(KernelDensity(), {'bandwidth': bw_choice}, cv=cv)
