@@ -109,40 +109,47 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
 import datetime
 
 class KDE:
-    def __init__(self, bw=1, verbose=0):
+    def __init__(self, bw=1, tw=60, verbose=0):
+        """
+
+        :param tw: int, default=None
+            time window of data to be considered in estimation
+        :param bw:
+        :param verbose:
+        """
         self.verbose = verbose
         self.bw = bw
-        self.kde = None
+        self.tw = tw
+        self.estimator = None
         pass
 
-    def fit(self, coords, tw=None, last_date=None):
+    def fit(self, coords, last_date=None):
         """
         :param coords: pd.Series
             Indexed and sorted by Date, with values = coords
-        :param tw: int, default=None
-            time window of data to be considered in estimation
         :param last_date: string (format='%Y-%m-%d') or DateTime, default None
             the last date of the time window. If None, the last date of coords is used
         """
-        if tw is not None:
+        if self.tw is not None:
             if last_date is None:
                 last_date = coords.index.max()
             elif isinstance(last_date, str):
                 last_date = datetime.datetime.strptime(last_date, format='%Y-%m-%d')
             # pandas time index slice include both begin and last date,
             # to have a time window=tw, the difference should be tw-1
-            begin_date = last_date - datetime.timedelta(days=tw-1)
+            begin_date = last_date - datetime.timedelta(days=self.tw-1)
             coords = coords.loc[begin_date, last_date]
 
         kde = KernelDensity(bandwidth=self.bw)
         kde.fit(coords.tolist())
-        self.kde = kde
+        self.estimator = kde
 
     def pred(self, data):
         # TODO: data could be other spatial unit
         # Now it is assumed as coords
 
-        pdf = np.exp(self.kde.score_samples(data.tolist()))
+        pdf = np.exp(self.estimator.score_samples(data.tolist()))
+        pdf = pd.Series(pdf, index=data.index)
         return pdf
 
     def tune(self, coords, bw_choice=None, cv=20):
