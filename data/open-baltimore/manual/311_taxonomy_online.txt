@@ -1,0 +1,92 @@
+Category,items
+Animals,Animal Attack Against Another Animal
+,Animal Attack Against a Human
+,Animal in Danger/Injured/Abused/ Neglect
+,Animal Trap or Capture
+,Barking Dog
+,Dead Animal Pick up
+,Failure to Restrain Animal Known Owner/Address
+,Stray Held or Trapped
+,Trapped in Vacant Building
+,Unsanitary Conditions
+City Street Trees,Fallen Limb from City Street Tree
+,Grass Mowing on Public Property
+,Inspect City Tree Request
+,Tree Fallen Down
+Emergency Notification Registration,Notification by Phone
+,Notification by Text / Email
+Environmental Health,Institutional Health Invesigation
+,Smoking Ban Violations 
+,Snow and or Ice on Sidewalks
+,Swimming Pool Health Investigation
+Food Complaints,Food Born Illness 
+,Food Facility Complaint
+Housing & Sanitation Violation / Building & Zoning Complaints,Animals Issues
+,Construction Without a Permit
+,Fire Protection
+,Insect Infestation
+,Liquor Board/ Adult Entertainment Complaint
+,Overcrowding
+,Rodent Infestation
+,Smoke Alarm Installation Request
+,Structural Deficiencies (residential)
+,Trash and/or High Grass on Property
+,Trees and Shrubs (private property)
+,Utility Systems
+,Vacant Residential Properties
+Recreation Centers and Parks,Ball Field Maintenance
+,Park Maintenance
+,Playground Maintenance
+Street Lighting,Street Light Inadequate or Too Bright
+,Street Light Out
+,Street Light Pole Access Cover Concerns
+Streets,"Alleys, Sidewalks,Alley Repair"
+,Bench Request
+,Bridge Repair
+,Crosswalk Markings Faded or Missing
+,Curb Repair
+,Damaged Street Light Pole
+,Debris Hanging from Poles or Wires
+,Fence repair (City property)
+,Guardrail Repair
+,Handicap Ramp Repair
+,Pothole Repair
+,Right of Way Permit Investigation
+,Salt Box Refill
+,Salt Box Request
+,Sidewalk Repair
+,Snow and Icy Condition on Street
+,Steel Plate Complaint
+,Street Markings
+,Street Repairs
+Traffic / Parking Signs and Signals,Parking Sign Request
+,Traffic / Parking Sign-Damaged
+,Traffic Sign-Missing
+,Traffic Sign-New
+,Traffic Sign-Change
+,Traffic Sign-Faded
+,Traffic Sign-Removal
+,Traffic Signal Repair
+Trash Garbage/ Recycling Collections /Rodents,Bulk Trash Pick up
+,Corner Can Collection
+,Dirty Alley Cleaning
+,Dirty Street Cleaning
+,Graffiti Removal
+,Illegal Dumping
+,Illegal Flyers on Private Property
+,Illegal Sign investigation on public property
+,Missed Mixed Refuse Pick Up
+,Missed Recycling Pickup
+,Rat Rub Out request (occupied single family residence)
+,Rodents
+Vehicles,48 Hour Parking Complaint
+,Abandoned Vehicle Complaint
+,Angled Parking Request
+,Commercial Vehicle Parked in Residential Area
+,EZ Parking Meter Complaints
+,Illegal Parking Complaint
+,Single Space Parking Meter Complaints
+Water,"Sewer Water, Storm Water, Hydrants,Damaged Hydrant"
+,Leaking Hydrant
+,Low Water Pressure
+,MD Stormwater Participation Event
