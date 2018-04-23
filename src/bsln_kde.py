@@ -151,9 +151,20 @@ class KDE:
         """
         :param coords: pd.Series
             Indexed and sorted by Date, with values = coords
+
+            For compatibility with inputs containing names of coords, such as those for RTM,
+            coords can be dict. In this case, only len(coords)=1 (1 key) is allowed.
+
         :param last_date: string (format='%Y-%m-%d') or DateTime, default None
             the last date of the time window. If None, the last date of coords is used
         """
+
+        # for compatibility
+        if isinstance(coords, dict):
+            if len(coords) != 1: raise ValueError('input coords is dict, but len!=1')
+            if self.verbose > 0: print('coords is a dictionary, extracting the only one value')
+            coords = list(coords.values())[0]
+
         if self.tw is not None:
             last_date = self.get_last_date(coords, last_date)
             # pandas time index slice include both begin and last date,

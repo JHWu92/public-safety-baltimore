@@ -46,7 +46,7 @@ class Bower:
         self.bw = bw
         self.tw = tw
         self.verbose = verbose
-        self.grid_size= grid_size
+        self.grid_size = grid_size
         # attributes set after self.fit
         self.last_date = None
         self.events = None
@@ -58,13 +58,24 @@ class Bower:
         """
         :param coords: pd.Series
             Indexed and sorted by Date, with values = coords
+
+            For compatibility with inputs containing names of coords, such as those for RTM,
+            coords can be dict. In this case, only len(coords)=1 (1 key) is allowed.
+
         :param last_date: string (format='%Y-%m-%d') or DateTime, default None
             the last date of the time window. If None, the last date of coords is used
         """
+
+        # for compatibility
+        if isinstance(coords, dict):
+            if len(coords) != 1: raise ValueError('input coords is dict, but len!=1')
+            if self.verbose > 0: print('coords is a dictionary, extracting the only one value')
+            coords = list(coords.values())[0]
+
         if self.tw is not None:
             if last_date is None:
                 last_date = coords.index.max()
-                if self.verbose>0:
+                if self.verbose > 0:
                     print('last_date is None, using coords.index.max()=%s as last_date' % (
                         last_date.strftime('%Y-%m-%d')))
             elif isinstance(last_date, str):
@@ -79,29 +90,29 @@ class Bower:
         events = gp.GeoDataFrame(coords.apply(lambda x: Point(*x))).rename(columns={'coords': 'geometry'}).reset_index()
         self.events = events
 
-    def pred(self, coords, now_date=None):
+    def pred(self, spatial_units, now_date=None):
         """
 
-        :param coords: 
+        :param spatial_units: assuming coords of the centers. pd.Series([coord], index=Date)
         :param now_date: Datetime-like object, default None
             now_date for the prediction. If None, now_date=self.last_date+1day
         :return: pd.Series, index=data.index, value=risk score
         """
-        # TODO: data could be other spatial unit
-        # Now it is assumed as coords
+        # TODO spatial_units can be shapes other than grids
+
         if now_date is None:
             now_date = self.last_date + datetime.timedelta(days=1)
-            if self.verbose >0:
+            if self.verbose > 0:
                 print('now_date is None, using self.last_date+1day=%s as now_date' % now_date.strftime('%Y-%m-%d'))
 
         # grids_center has same index as coords
-        grids = gp.GeoDataFrame(coords)
+        grids = gp.GeoDataFrame(spatial_units)
         grids.columns = ['cen_coords']
         grids['geometry'] = grids.cen_coords.apply(lambda x: Point(*x))
         grids['geometry'] = grids.buffer(self.bw)
         joined = gp.sjoin(self.events, grids)
-        pred = joined.groupby('index_right')\
-            .apply(lambda df: calc_risk(df, self.grid_size, now_date))\
+        pred = joined.groupby('index_right') \
+            .apply(lambda df: calc_risk(df, self.grid_size, now_date)) \
             .reindex(grids.index).fillna(0)
         return pred
 
