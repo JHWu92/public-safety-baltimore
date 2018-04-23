@@ -1,0 +1,16 @@
+Category     ,Description
+theft_larceny,LARCENY
+             ,LARCENY FROM AUTO
+             ,AUTO THEFT
+assault      ,COMMON ASSAULT
+             ,AGG. ASSAULT
+             ,ASSAULT BY THREAT
+burglary     ,BURGLARY
+robbery      ,ROBBERY - STREET
+             ,ROBBERY - COMMERCIAL
+             ,ROBBERY - RESIDENCE
+             ,ROBBERY - CARJACKING
+shooting     ,SHOOTING
+rape         ,RAPE
+homicide     ,HOMICIDE
+arson        ,ARSON
