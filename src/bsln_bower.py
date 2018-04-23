@@ -105,7 +105,7 @@ class Bower:
             .reindex(grids.index).fillna(0)
         return pred
 
-    def tune(self, bw=None, **kwargs):
+    def tune(self, bw=None):
         """
         Bowers' paper doesn't have bw tuning, this method is for consistency
         """
