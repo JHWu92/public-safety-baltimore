@@ -137,6 +137,16 @@ class KDE:
         self.tw = tw
         self.estimator = None
 
+    def get_last_date(self, coords, last_date):
+        if last_date is None:
+            last_date = coords.index.max()
+            if self.verbose > 0:
+                print('last_date is None, using coords.index.max()=%s as last_date' % (
+                    last_date.strftime('%Y-%m-%d')))
+        elif isinstance(last_date, str):
+            last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d')
+        return last_date
+
     def fit(self, coords, last_date=None):
         """
         :param coords: pd.Series
@@ -145,13 +155,7 @@ class KDE:
             the last date of the time window. If None, the last date of coords is used
         """
         if self.tw is not None:
-            if last_date is None:
-                last_date = coords.index.max()
-                if self.verbose>0:
-                    print('last_date is None, using coords.index.max()=%s as last_date' % (
-                        last_date.strftime('%Y-%m-%d')))
-            elif isinstance(last_date, str):
-                last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d')
+            last_date = self.get_last_date(coords, last_date)
             # pandas time index slice include both begin and last date,
             # to have a time window=tw, the difference should be tw-1
             begin_date = last_date - datetime.timedelta(days=self.tw - 1)
@@ -161,7 +165,13 @@ class KDE:
         kde.fit(coords.tolist())
         self.estimator = kde
 
-    def pred(self, data):
+    def pred(self, data, now_date=None):
+        """
+
+        :param coords: pd.Series
+        :param now_date: not used in KDE,
+        :return:
+        """
         # TODO: data could be other spatial unit
         # Now it is assumed as coords
 
