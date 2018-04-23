@@ -53,7 +53,7 @@ class RTM:
         return '<RTM bw={}, grid_size={}, tw={}>'.format(
             self.bw, self.grid_size, self.tw)
 
-    def __init__(self, grid_size=30.48, bw=304.8, tw=, verbose=0):
+    def __init__(self, grid_size=30.48, bw=304.8, tw=60, verbose=0):
         self.grid_size = grid_size
         self.bw = bw
         self.tw = tw
