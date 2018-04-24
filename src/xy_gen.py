@@ -14,5 +14,5 @@ def y_cnt_event(spatial_units, coords):
     while events.crs is None and spatial_units.crs is not None:
         events.crs = spatial_units.crs
     joined = gp.sjoin(events, spatial_units)
-    y_cnt = spatial_units.join(joined.groupby('index_right').size().rename('counts'), how='left').fillna(0)
-    return y_cnt['counts']
+    y_cnt = spatial_units.join(joined.groupby('index_right').size().rename(C.COL.num_events), how='left').fillna(0)
+    return y_cnt[C.COL.num_events]
