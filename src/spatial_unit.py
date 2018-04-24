@@ -1,5 +1,7 @@
 import geopandas as gp
 
+from src import constants as C
+
 
 def get_grids(shape, grid_size=200, crs=None):
     from shapely.geometry import Polygon, LineString, box
@@ -11,7 +13,7 @@ def get_grids(shape, grid_size=200, crs=None):
     if isinstance(shape, tuple):
         if len(shape) == 4:
             lon_min, lat_min, lon_max, lat_max = shape
-            do_intersect=False
+            do_intersect = False
         else:
             raise ValueError('shape is a tuple, but its len != 4')
     elif isinstance(shape, LineString):
@@ -36,7 +38,7 @@ def get_grids(shape, grid_size=200, crs=None):
             grids_poly.append(g)
 
     grids = gp.GeoDataFrame(grids_poly).rename(columns={0: 'geometry'})
-    grids['cen_coords'] = grids.geometry.apply(lambda x: x.centroid.coords[0])
+    grids[C.COL.center] = grids.geometry.apply(lambda x: x.centroid.coords[0])
     if crs is not None:
         # for unknown reason, sometimes grids.crs is not set by assigning once
         while grids.crs is None:
