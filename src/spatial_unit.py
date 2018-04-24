@@ -44,11 +44,30 @@ def get_grids(shape, grid_size=200, crs=None):
         while grids.crs is None:
             grids.crs = crs
 
+    grids[C.COL.area] = grid_size**2
     return grids
 
 
-def baltimore_grids(grid_size=200, cityline_path='data/open-baltimore/raw/Baltcity_Line/baltcity_line.shp'):
+def baltimore_grids(grid_size=200, cityline_path=None):
+    if cityline_path is None:
+        cityline_path = C.Path_shape.cityline
     cityline = gp.read_file(cityline_path)
     cityline = cityline.to_crs(epsg=3559)
     grids = get_grids(cityline.geometry[0], grid_size, crs=cityline.crs)
     return grids
+
+
+def main():
+    import pandas as pd
+    grids = baltimore_grids(cityline_path='../'+C.Path_shape.cityline)
+    # print(grids.head())
+    print(pd.DataFrame([grids.Area, grids.Cen_coords]).T.head())
+    a = grids.Area
+    a.name = 'aaaa'
+    print(pd.DataFrame([a, grids.Cen_coords]).T.head())
+
+    return
+
+
+if __name__ == '__main__':
+    main()
