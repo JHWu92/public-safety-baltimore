@@ -5,6 +5,8 @@ import geopandas as gp
 import numpy as np
 from shapely.geometry import Point
 
+from src import constants as C
+
 
 # some helper function for Bower.pred()
 def get_distance(row):
@@ -71,7 +73,7 @@ class Bower:
         # for compatibility
         if isinstance(coords, dict):
             if len(coords) != 1: raise ValueError('input coords is dict, but len!=1')
-            if self.verbose > 0: print('coords is a dictionary, extracting the only one value')
+            if self.verbose > 0: print('coords is a dictionary, len==1, keep its value only')
             coords = list(coords.values())[0]
 
         if self.tw is not None:
@@ -89,7 +91,8 @@ class Bower:
             coords = coords.loc[begin_date:last_date]
             self.last_date = last_date
 
-        events = gp.GeoDataFrame(coords.apply(lambda x: Point(*x))).rename(columns={'coords': 'geometry'}).reset_index()
+        events = gp.GeoDataFrame(coords.apply(lambda x: Point(*x))).rename(
+            columns={C.COL.coords: 'geometry'}).reset_index()
         self.events = events
 
     def pred(self, spatial_units, now_date=None):

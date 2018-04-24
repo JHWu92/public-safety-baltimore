@@ -9,7 +9,9 @@ import pandas as pd
 from pyproj import Proj, transform
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
+
 from src import constants as C
+
 
 def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', from_epsg=4326, to_epsg=None,
               col_type=None, keep_types=None, col_lon=None, col_lat=None, col_coords=None, verbose=0):
@@ -164,7 +166,7 @@ class KDE:
         # for compatibility
         if isinstance(coords, dict):
             if len(coords) != 1: raise ValueError('input coords is dict, but len!=1')
-            if self.verbose > 0: print('coords is a dictionary, extracting the only one value')
+            if self.verbose > 0: print('coords is a dictionary, len==1, keep its value only')
             coords = list(coords.values())[0]
 
         if self.tw is not None:
