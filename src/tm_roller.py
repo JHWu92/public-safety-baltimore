@@ -1,6 +1,7 @@
 # Author: Jiahui Wu
 
 import datetime
+from collections import defaultdict
 
 import pandas as pd
 
@@ -112,40 +113,55 @@ class TM_ROLLER:
             tw_sd += datetime.timedelta(days=self.roll_step)
             num_loops += 1
 
-    def eval(self, metric, sp_units):
+    def eval(self, metrics, sp_units):
         """
-
-        metric:
-
+        :param metrics: a list of metrics for evaluation;
+            if it is callable, wrap it in a list
         """
-        # TODO multiple metrics
-        result = {}
+        if callable(metrics):
+            metrics = [metrics]
+
+        result = defaultdict(dict)
         for r in self.rolling():
             # TODO: methods.fit/pred doesn't work for supervised learning. maybe pred->rank?
             # this fit doesn't work for supervised learning,
             # need to specify at fit-phase
             # the spatial units and associated y
             # instead of just y_events
+
+            # fit and pred risk score
             self.method.fit(r['train_x_events'], r['train_y_events'], last_date=r['train_ed'])
-            pred = self.method.pred(sp_units[C.COL.center], now_date=r['tw_sd'])
-            y = y_cnt_event(sp_units, r['test_y_events'])
-            eval_pred = metric(pred, y)
-            result['%s~%s' % (r['tw_sd'].strftime('%Y-%m-%d'), r['tw_ed'].strftime('%Y-%m-%d'))] = eval_pred
-        return result
+            risk_score = self.method.pred(sp_units[C.COL.center], now_date=r['tw_sd'])
+
+            # build attributes of spatial units for metrics
+            su_attr = sp_units.copy()
+            su_attr[C.COL.risk] = risk_score
+            su_attr[C.COL.num_events] = y_cnt_event(sp_units, r['test_y_events'])
+            for m in metrics:
+                eval_pred = m(su_attr)
+                period_str = '%s~%s' % (r['tw_sd'].strftime('%Y-%m-%d'), r['tw_ed'].strftime('%Y-%m-%d'))
+                result[m.__name__][period_str] = eval_pred
+
+        res_df = {}
+        for m in metrics:
+            # print(m.__name__)
+            res_df[m.__name__] = pd.DataFrame.from_dict(result[m.__name__])
+        return res_df
 
 
 def main():
     from src.data_prep import prep_911_by_category
     from src.spatial_unit import baltimore_grids
-    from src.eval_metric import hit_rate
+    from src import eval_metric
     from src.bsln_rtm import RTM
     d911_by_cat = prep_911_by_category(path='../' + C.PATH_DEV.p911, verbose=1)
+    d911_by_cat = {key: d911_by_cat[key] for key in ['burglary', 'abuse']}
     # d911_coords = {name: data[C.COL.coords] for name, data in d911_by_cat.items()}
     d911_y = d911_by_cat['abuse']
     vstep = 1
     vtw = 1
     vsd = '2015-03-02'
-    ved = '2015-03-10'
+    ved = '2015-03-02'
     grid_size = 200
     train_tw = 60
 
@@ -154,7 +170,16 @@ def main():
     method = RTM(grid_size=grid_size, bw=400, tw=train_tw, verbose=1)
     tmroller = TM_ROLLER(method, d911_by_cat, d911_y, vsd, ved, roll_step=vstep, eval_tw=vtw, verbose=2)
 
-    res = tmroller.eval(hit_rate, grids)
+    metrics = [
+        # eval_metric.hit_rate, eval_metric.search_efficient_rate, eval_metric.prediction_accuracy_index,
+        eval_metric.area_to_perimeter_ratio
+    ]
+    res = tmroller.eval(metrics, grids)
+    for m in metrics:
+        print('==================')
+        print(m.__name__)
+        print('==================')
+        print(res[m.__name__])
     pass
 
 
