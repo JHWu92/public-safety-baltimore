@@ -56,29 +56,29 @@ class Bower:
     def has_fit(self):
         return self.last_date is not None
 
-    def fit(self, coords, y_events=None, last_date=None):
+    def fit(self, x_coords, y_coords=None, last_date=None):
         """
-        :param coords: pd.Series
+        :param x_coords: pd.Series
             Indexed and sorted by Date, with values = coords
 
             For compatibility with inputs containing names of coords, such as those for RTM,
             coords can be dict. In this case, only len(coords)=1 (1 key) is allowed.
 
-        :param y_events: not used in bower, for compatibility purpose
+        :param y_coords: not used in bower, for compatibility purpose
 
         :param last_date: string (format='%Y-%m-%d') or DateTime, default None
             the last date of the time window. If None, the last date of coords is used
         """
 
         # for compatibility
-        if isinstance(coords, dict):
-            if len(coords) != 1: raise ValueError('input coords is dict, but len!=1')
+        if isinstance(x_coords, dict):
+            if len(x_coords) != 1: raise ValueError('input coords is dict, but len!=1')
             if self.verbose > 0: print('coords is a dictionary, len==1, keep its value only')
-            coords = list(coords.values())[0]
+            x_coords = list(x_coords.values())[0]
 
         if self.tw is not None:
             if last_date is None:
-                last_date = coords.index.max()
+                last_date = x_coords.index.max()
                 if self.verbose > 0:
                     print('last_date is None, using coords.index.max()=%s as last_date' % (
                         last_date.strftime('%Y-%m-%d')))
@@ -88,10 +88,10 @@ class Bower:
             # pandas time index slice include both begin and last date,
             # to have a time window=tw, the difference should be tw-1
             begin_date = last_date - datetime.timedelta(days=self.tw - 1)
-            coords = coords.loc[begin_date:last_date]
+            x_coords = x_coords.loc[begin_date:last_date]
             self.last_date = last_date
 
-        events = gp.GeoDataFrame(coords.apply(lambda x: Point(*x))).rename(
+        events = gp.GeoDataFrame(x_coords.apply(lambda x: Point(*x))).rename(
             columns={C.COL.coords: 'geometry'}).reset_index()
         self.events = events
 

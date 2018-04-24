@@ -149,35 +149,35 @@ class KDE:
             last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d')
         return last_date
 
-    def fit(self, coords, y_events=None, last_date=None):
+    def fit(self, x_coords, y_coords=None, last_date=None):
         """
-        :param coords: pd.Series
+        :param x_coords: pd.Series
             Indexed and sorted by Date, with values = coords
 
             For compatibility with inputs containing names of coords, such as those for RTM,
             coords can be dict. In this case, only len(coords)=1 (1 key) is allowed.
 
-        :param y_events: not used in KDE, for compatibility purpose
+        :param y_coords: not used in KDE, for compatibility purpose
 
         :param last_date: string (format='%Y-%m-%d') or DateTime, default None
             the last date of the time window. If None, the last date of coords is used
         """
 
         # for compatibility
-        if isinstance(coords, dict):
-            if len(coords) != 1: raise ValueError('input coords is dict, but len!=1')
+        if isinstance(x_coords, dict):
+            if len(x_coords) != 1: raise ValueError('input coords is dict, but len!=1')
             if self.verbose > 0: print('coords is a dictionary, len==1, keep its value only')
-            coords = list(coords.values())[0]
+            x_coords = list(x_coords.values())[0]
 
         if self.tw is not None:
-            last_date = self.get_last_date(coords, last_date)
+            last_date = self.get_last_date(x_coords, last_date)
             # pandas time index slice include both begin and last date,
             # to have a time window=tw, the difference should be tw-1
             begin_date = last_date - datetime.timedelta(days=self.tw - 1)
-            coords = coords.loc[begin_date:last_date]
+            x_coords = x_coords.loc[begin_date:last_date]
 
         kde = KernelDensity(bandwidth=self.bw)
-        kde.fit(coords.tolist())
+        kde.fit(x_coords.tolist())
         self.estimator = kde
 
     def pred(self, data, now_date=None):

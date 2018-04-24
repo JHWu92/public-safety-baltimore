@@ -89,19 +89,19 @@ class RTM:
 
         return last_date
 
-    def fit(self, dict_coords, y_events=None, last_date=None):
+    def fit(self, named_x_coords, y_coords=None, last_date=None):
         """
 
-        :param dict_coords: {name_of_coords: pd.Series([coord], index=Date)}
-        :param y_events: not used in RTM, for compatibility purpose
+        :param named_x_coords: {name_of_coords: pd.Series([coord], index=Date)}
+        :param y_coords: not used in RTM, for compatibility purpose
         :param last_date: string (format='%Y-%m-%d') or DateTime, default None
             the last date of the time window. If None, the last date of coords is used
         :return:
         """
-        last_date = self.get_last_date(dict_coords, last_date=last_date)
+        last_date = self.get_last_date(named_x_coords, last_date=last_date)
 
         # for each type of coords, fit a KDE
-        for name, coords in dict_coords.items():
+        for name, coords in named_x_coords.items():
             kde = KDE(bw=self.bw, tw=self.tw, verbose=self.verbose)
             kde.fit(coords, last_date=last_date)
             self.estimators[name] = kde
