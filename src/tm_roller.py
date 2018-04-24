@@ -2,18 +2,22 @@
 
 import datetime
 
-from src.xy_gen import y_cnt_event
 import pandas as pd
+
+from src import constants as C
+from src.xy_gen import y_cnt_event
 
 
 class TM_ROLLER:
-    def __init__(self, method, data, eval_sd, eval_ed, roll_step=1, eval_tw=1, verbose=0):
+    def __init__(self, method, named_x_events, y_events, eval_sd, eval_ed, roll_step=1, eval_tw=1, verbose=0):
         """
 
         Parameters
         ----------
         :param method:
-        :param data: pd.Series, indexed and sorted by date. --> {name: pd.Series}
+        :param named_x_events: pd.Series, indexed and sorted by date. --> {name: pd.Series}
+        :param y_events: pd.Series, indexed and sorted by date.
+            events means they are not mapped as features for spaital units
 
         :param eval_sd: str (format='%Y-%m-%d') or Datetime obj
             the start_date of the time window for evaluation
@@ -31,8 +35,11 @@ class TM_ROLLER:
 
         """
         self.method = method
-        if isinstance(data, pd.Series): data = {'autoname': data}
-        self.data = data
+        if isinstance(named_x_events, pd.Series):
+            named_x_events = {'autoname': named_x_events}
+            if verbose > 0: print('wrap pd.Series with dict key')
+        self.x_events = named_x_events
+        self.y_events = y_events
         self.eval_sd = datetime.datetime.strptime(eval_sd, '%Y-%m-%d') if isinstance(eval_sd, str) else eval_sd
         self.eval_ed = datetime.datetime.strptime(eval_ed, '%Y-%m-%d') if isinstance(eval_ed, str) else eval_ed
         self.eval_tw = eval_tw
@@ -40,26 +47,29 @@ class TM_ROLLER:
         self.verbose = verbose
 
     def get_data_date_range(self):
-        min_date, max_date = None, None
-        for d in self.data.values():
+        # TODO: intersect the date range of Y with X, or Union(which it is now)
+        min_date, max_date = self.y_events.index.min(), self.y_events.index.max()
+        for d in self.x_events.values():
             mini, maxi = d.index.min(), d.index.max()
-            if min_date is None or mini < min_date:
+            if mini < min_date:
                 min_date = mini
-            if max_date is None or maxi > max_date:
+            if maxi > max_date:
                 max_date = maxi
+
         return min_date, max_date
 
     def rolling(self):
         """
         """
 
-        if self.data is None: raise ValueError('set data first')
+        if self.x_events is None: raise ValueError('set data first')
 
         # dates = self.data.index.unique()
         # eval_dates = dates[(dates >= self.sd) & (dates <= self.ed)]
 
         data_sd, data_ed = self.get_data_date_range()
-        if self.verbose>0: print('Date: [%s, %s]' % (data_sd, data_ed))
+        if self.verbose > 0: print('Date: [%s, %s]' % (data_sd.strftime(C.COL.date_format),
+                                                       data_ed.strftime(C.COL.date_format)))
         # num_days includes both start and end date, thus +1
         num_days = (data_ed - data_sd).days + 1
 
@@ -72,12 +82,13 @@ class TM_ROLLER:
                                          (data_ed, self.eval_ed))
 
         if self.verbose > 0:
-            num_experiment = (self.eval_ed - self.eval_sd).days // self.roll_step
-            print('total number of experiment:', num_experiment)
+            num_experiment = ((self.eval_ed - self.eval_sd).days + 1) // self.roll_step
+            print('total number of experiment: ~%d' % num_experiment)
 
         tw_sd = self.eval_sd
         num_loops = 1
         while tw_sd <= self.eval_ed:
+            # TODO what if a time window, either train or test_x_events, or either X or Y, is empty
             # pandas time index slice include both begin and last date,
             # to have a time window=tw, the difference should be tw-1
             tw_ed = tw_sd + datetime.timedelta(days=self.eval_tw - 1)
@@ -88,9 +99,16 @@ class TM_ROLLER:
                 print('No.%d exp, testing period: %s ~ %s' % (
                     num_loops, tw_sd.strftime('%Y-%m-%d'), tw_ed.strftime('%Y-%m-%d')))
 
-            train = {name: data.loc[:train_ed] for name, data in self.data.items()}
-            test = {name: data.loc[tw_sd: tw_ed] for name, data in self.data.items()}
-            yield {'train': train, 'test': test, 'tw_sd': tw_sd, 'tw_ed': tw_ed, 'train_ed': train_ed}
+            train_x_events = {name: data.loc[:train_ed] for name, data in self.x_events.items()}
+            # there won't be test_x_events, since that is in the future
+            # test_x_events = {name: data.loc[tw_sd: tw_ed] for name, data in self.x_events.items()}
+            train_y_events = self.y_events.loc[:train_ed]
+            test_y_events = self.y_events.loc[tw_sd: tw_ed]
+            yield {
+                'train_x_events': train_x_events,  # 'test_x_events': test_x_events,
+                'train_y_events': train_y_events, 'test_y_events': test_y_events,
+                'tw_sd'         : tw_sd, 'tw_ed': tw_ed, 'train_ed': train_ed
+            }
             tw_sd += datetime.timedelta(days=self.roll_step)
             num_loops += 1
 
@@ -103,10 +121,14 @@ class TM_ROLLER:
         # TODO multiple metrics
         result = {}
         for r in self.rolling():
-            self.method.fit(r['train'], last_date=r['train_ed'])
-            # TODO allow diverse parameters for pred
-            pred = self.method.pred(sp_units['cen_coords'])
-            y = y_cnt_event(sp_units, r['test'])
+            # TODO: methods.fit/pred doesn't work for supervised learning. maybe pred->rank?
+            # this fit doesn't work for supervised learning,
+            # need to specify at fit-phase
+            # the spatial units and associated y
+            # instead of just y_events
+            self.method.fit(r['train_x_events'], r['train_y_events'], last_date=r['train_ed'])
+            pred = self.method.pred(sp_units[C.COL.center], now_date=r['tw_sd'])
+            y = y_cnt_event(sp_units, r['test_y_events'])
             eval_pred = metric(pred, y)
             result['%s~%s' % (r['tw_sd'].strftime('%Y-%m-%d'), r['tw_ed'].strftime('%Y-%m-%d'))] = eval_pred
         return result
@@ -114,17 +136,27 @@ class TM_ROLLER:
 
 def main():
     from src.data_prep import prep_911_by_category
-    from src import constants as C
-    d911_by_cat = prep_911_by_category(path='../'+C.PATH_DEV.p911, verbose=1)
-    d911_coords = {name: data[C.COL.coords] for name, data in d911_by_cat.items()}
+    from src.spatial_unit import baltimore_grids
+    from src.eval_metric import hit_rate
+    from src.bsln_rtm import RTM
+    d911_by_cat = prep_911_by_category(path='../' + C.PATH_DEV.p911, verbose=1)
+    # d911_coords = {name: data[C.COL.coords] for name, data in d911_by_cat.items()}
+    d911_y = d911_by_cat['abuse']
     vstep = 1
     vtw = 1
     vsd = '2015-03-02'
     ved = '2015-03-10'
-    tmroller = TM_ROLLER(None, d911_coords, vsd, ved, roll_step=vstep, eval_tw=vtw, verbose=2)
-    for x in tmroller.rolling():
-        print(1)
+    grid_size = 200
+    train_tw = 60
+
+    grids = baltimore_grids(grid_size=grid_size,
+                            cityline_path='../data/open-baltimore/raw/Baltcity_Line/baltcity_line.shp')
+    method = RTM(grid_size=grid_size, bw=400, tw=train_tw, verbose=1)
+    tmroller = TM_ROLLER(method, d911_by_cat, d911_y, vsd, ved, roll_step=vstep, eval_tw=vtw, verbose=2)
+
+    res = tmroller.eval(hit_rate, grids)
     pass
+
 
 if __name__ == '__main__':
     main()
