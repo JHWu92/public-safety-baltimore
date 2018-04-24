@@ -9,7 +9,7 @@ import pandas as pd
 from pyproj import Proj, transform
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
-
+from src import constants as C
 
 def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', from_epsg=4326, to_epsg=None,
               col_type=None, keep_types=None, col_lon=None, col_lat=None, col_coords=None, verbose=0):
@@ -83,9 +83,9 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
     # get coords Series
     if verbose > 0: print('get coords Series')
     if 'geometry' in clean.columns:
-        clean['coords'] = clean.geometry.apply(lambda x: x.coords[0])
+        clean[C.COL.coords] = clean.geometry.apply(lambda x: x.coords[0])
     elif col_lon is not None and col_lat is not None:
-        clean['coords'] = clean.apply(lambda x: (x[col_lon], x[col_lat]), axis=1)
+        clean[C.COL.coords] = clean.apply(lambda x: (x[col_lon], x[col_lat]), axis=1)
     elif col_coords is not None:
         pass
 
@@ -95,10 +95,10 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
     if to_epsg is not None:
         from_proj = Proj(init='epsg:%d' % from_epsg)
         to_proj = Proj(init='epsg:%d' % to_epsg)
-        lons = clean['coords'].apply(lambda x: x[0]).tolist()
-        lats = clean['coords'].apply(lambda x: x[1]).tolist()
+        lons = clean[C.COL.coords].apply(lambda x: x[0]).tolist()
+        lats = clean[C.COL.coords].apply(lambda x: x[1]).tolist()
         lons, lats = transform(from_proj, to_proj, lons, lats)
-        clean['coords'] = list(zip(lons, lats))
+        clean[C.COL.coords] = list(zip(lons, lats))
 
     # clean date column
     if verbose > 0:
@@ -147,13 +147,15 @@ class KDE:
             last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d')
         return last_date
 
-    def fit(self, coords, last_date=None):
+    def fit(self, coords, y_events=None, last_date=None):
         """
         :param coords: pd.Series
             Indexed and sorted by Date, with values = coords
 
             For compatibility with inputs containing names of coords, such as those for RTM,
             coords can be dict. In this case, only len(coords)=1 (1 key) is allowed.
+
+        :param y_events: not used in KDE, for compatibility purpose
 
         :param last_date: string (format='%Y-%m-%d') or DateTime, default None
             the last date of the time window. If None, the last date of coords is used

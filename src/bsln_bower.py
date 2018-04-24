@@ -54,13 +54,15 @@ class Bower:
     def has_fit(self):
         return self.last_date is not None
 
-    def fit(self, coords, last_date=None):
+    def fit(self, coords, y_events=None, last_date=None):
         """
         :param coords: pd.Series
             Indexed and sorted by Date, with values = coords
 
             For compatibility with inputs containing names of coords, such as those for RTM,
             coords can be dict. In this case, only len(coords)=1 (1 key) is allowed.
+
+        :param y_events: not used in bower, for compatibility purpose
 
         :param last_date: string (format='%Y-%m-%d') or DateTime, default None
             the last date of the time window. If None, the last date of coords is used
