@@ -6,7 +6,7 @@ import pandas as pd
 from pyproj import Proj, transform
 
 
-def prep_911_by_category(path=None, from_epsg=4326, to_epsg=3559, verbose=0):
+def prep_911_by_category(path=None, from_epsg=4326, to_epsg=3559, verbose=0, coords_only=True):
     """
     the 911 data is cleaned, see clean_911.py for details
     """
@@ -32,6 +32,8 @@ def prep_911_by_category(path=None, from_epsg=4326, to_epsg=3559, verbose=0):
     d911 = d911.reset_index().set_index(C.COL.date)
 
     d911_by_cat = dict(tuple(d911.groupby(C.COL.category)))
+    if coords_only:
+        d911_by_cat = {name: data[C.COL.coords] for name, data in d911_by_cat.items()}
     return d911_by_cat
 
 
