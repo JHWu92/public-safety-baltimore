@@ -13,6 +13,7 @@ def auc_idx(len_obj, num_obs):
     :param num_obs: number of observation points for plotting
     :return:
     """
+    # print(len_obj, num_obs)
     idx_for_auc = [int(len_obj * (i + 1) / num_obs) for i in range(num_obs - 1)] + [len_obj - 1]
     readable_index = ['%.0f%%' % ((i + 1) / num_obs * 100) for i in range(num_obs)]
     return idx_for_auc, readable_index
@@ -23,16 +24,17 @@ def bin_idx(risk, num):
     iloc_idx, readable_idx = [], []
     for i in range(num):
         thres = mi + (ma - mi) * (1 - (i + 1) / num)
-        iloc_idx.append((risk >= thres).sum())
-        readable_idx.append('score>=%.2f' % thres)
+        iloc_idx.append((risk >= thres).sum()-1)
+        readable_idx.append('bin>=%d' % (i+1))
+    # print(iloc_idx, readable_idx)
     return iloc_idx, readable_idx
 
 
 def get_idx(spatial_unit_attr, num, auc_or_bin='auc'):
-    if auc_or_bin =='auc':
+    if auc_or_bin == 'auc':
         len_obj = len(spatial_unit_attr)
-        return auc_idx(len_obj,num)
-    elif auc_or_bin =='bin':
+        return auc_idx(len_obj, num)
+    elif auc_or_bin == 'bin':
         risk = spatial_unit_attr[C.COL.risk]
         return bin_idx(risk, num)
     else:
@@ -58,7 +60,8 @@ def hit_to_pai(spatial_unit_attr, event_normalized=False,
     # num_grids = len(spatial_unit_attr)
     # idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
     # iloc_idx, readable_idx = auc_idx(num_grids, 10)
-    iloc_idx, readable_idx = get_idx(spatial_unit_attr, auc_or_bin)
+    num = 5 if auc_or_bin == 'bin' else 10
+    iloc_idx, readable_idx = get_idx(spatial_unit_attr, num, auc_or_bin)
 
     tmp = spatial_unit_attr.sort_values(C.COL.risk, ascending=False)
     tmp[C.COL.area] /= 1e6
@@ -71,16 +74,16 @@ def hit_to_pai(spatial_unit_attr, event_normalized=False,
         tmp['cum_area'] = tmp[C.COL.area].cumsum() / area_factor
         res = tmp['hit'] / tmp['cum_area']
 
-    auc = res.iloc[iloc_idx]
-    auc.index = readable_idx
-    return auc
+    res = res.iloc[iloc_idx]
+    res.index = readable_idx
+    return res
 
 
-def hit_rate(spatial_unit_attr):
-    return hit_to_pai(spatial_unit_attr, event_normalized=True, event_by_area=False)
+def hit_rate_auc(spatial_unit_attr):
+    return hit_to_pai(spatial_unit_attr, event_normalized=True, event_by_area=False, auc_or_bin='auc')
 
 
-def search_efficient_rate(spatial_unit_attr):
+def search_efficient_rate_auc(spatial_unit_attr):
     """Proposed by Bower et al 2004 (Bowers2004-gn):
     the number of crimes successfully predicted per kilometre-squared.
     Using a standardized index allows different procedures
@@ -94,10 +97,11 @@ def search_efficient_rate(spatial_unit_attr):
         columns: at least risk, num_events, area
     :return:
     """
-    return hit_to_pai(spatial_unit_attr, event_normalized=False, area_normalized=False, event_by_area=True)
+    return hit_to_pai(spatial_unit_attr, event_normalized=False, area_normalized=False, event_by_area=True,
+                      auc_or_bin='auc')
 
 
-def prediction_accuracy_index(spatial_unit_attr):
+def prediction_accuracy_index_auc(spatial_unit_attr):
     """PAI, Proposed by \cite{Chainey2008-ys}.
 
     the greater the number of future crime events in
@@ -108,74 +112,19 @@ def prediction_accuracy_index(spatial_unit_attr):
      any study area, any crime point data,
      and to any analysis technique that aims to predict spatial patterns of crime
     """
-    return hit_to_pai(spatial_unit_attr, event_normalized=True, area_normalized=True, event_by_area=True)
+    return hit_to_pai(spatial_unit_attr, event_normalized=True, area_normalized=True, event_by_area=True,
+                      auc_or_bin='auc')
 
 
-def hit_rate_old(spatial_unit_attr):
-    """
-    :param spatial_unit_attr: pd.DataFrame
-        - index=unit_index
-        - columns: at least risk and num_events
-
-    :return:
-    """
-    # risk = spatial_unit_attr[C.COL.risk]
-    # num_events = spatial_unit_attr[C.COL.num_events]
-
-    # auc index
-    num_grids = len(spatial_unit_attr)
-    # idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
-    idx_for_auc, readable_idx = auc_idx(num_grids, 10)
-
-    tmp = spatial_unit_attr.sort_values(C.COL.risk, ascending=False)
-    hit = tmp[C.COL.num_events].cumsum() / tmp[C.COL.num_events].sum()
-    # rank = risk.sort_values(ascending=False).index
-    # hit = num_events.loc[rank].cumsum() / num_events.sum()
-    auc = hit.iloc[idx_for_auc]
-    auc.index = readable_idx
-    return auc
-
-
-def search_efficient_rate_old(spatial_unit_attr, auc_or_bin='auc'):
-    """Proposed by Bower et al 2004 (Bowers2004-gn):
-    the number of crimes successfully predicted per kilometre-squared.
-    Using a standardized index allows different procedures
-    and different hot spots to be meaningfully compared.
-
-    Critics by Chainey2008-ys:
-    does not easily allow for comparisons between study areas of different sizes
-
-    :param spatial_unit_attr: pd.DataFrame,
-        index=unit_index,
-        columns: at least risk, num_events, area
-    :param auc_or_bin: which idx to use
-    :return:
-    """
-    # auc index
-    # num_grids = len(spatial_unit_attr)
-    # idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
-    # idx_for_auc, readable_idx = auc_idx(num_grids, 10)
-    iloc_idx, readable_idx = get_idx(spatial_unit_attr, auc_or_bin)
-
-    tmp = spatial_unit_attr.sort_values(C.COL.risk, ascending=False)
-    tmp['cum_events'] = tmp[C.COL.num_events].cumsum()
-    tmp['cum_area'] = tmp[C.COL.area].cumsum() / 1e6
-
-    rate = tmp['cum_events'] / tmp['cum_area']
-    auc = rate.iloc[iloc_idx]
-    auc.index = readable_idx
-
-    return auc
-
-
-def area_to_perimeter_ratio(spatial_unit_attr, auc_or_bin='auc'):
+def area_to_perimeter_ratio_auc(spatial_unit_attr, auc_or_bin='auc'):
     """Proposed by bower-2004"""
     from shapely.ops import cascaded_union
     # auc index
     # num_grids = len(spatial_unit_attr)
     # idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
     # idx_for_auc, readable_idx = auc_idx(num_grids, 10)
-    iloc_idx, readable_idx = get_idx(spatial_unit_attr, auc_or_bin)
+    num = 5 if auc_or_bin == 'bin' else 10
+    iloc_idx, readable_idx = get_idx(spatial_unit_attr, num, auc_or_bin)
 
     tmp = spatial_unit_attr.sort_values(C.COL.risk, ascending=False)
     tmp['cum_area'] = tmp[C.COL.area].cumsum()
@@ -190,6 +139,24 @@ def area_to_perimeter_ratio(spatial_unit_attr, auc_or_bin='auc'):
         # print(cascaded_union(sub_units).wkt)
 
     return pd.Series(res, index=readable_idx)
+
+
+def hit_rate_bin(spatial_unit_attr):
+    return hit_to_pai(spatial_unit_attr, event_normalized=True, event_by_area=False, auc_or_bin='bin')
+
+
+def search_efficient_rate_bin(spatial_unit_attr):
+    return hit_to_pai(spatial_unit_attr, event_normalized=False, area_normalized=False, event_by_area=True,
+                      auc_or_bin='bin')
+
+
+def prediction_accuracy_index_bin(spatial_unit_attr):
+    return hit_to_pai(spatial_unit_attr, event_normalized=True, area_normalized=True, event_by_area=True,
+                      auc_or_bin='bin')
+
+
+def area_to_perimeter_ratio_bin(spatial_unit_attr):
+    return area_to_perimeter_ratio_auc(spatial_unit_attr, 'bin')
 
 
 def main():
@@ -208,8 +175,8 @@ def main():
     # print(hit_rate(df))
     # print(search_efficient_rate(df))
     # print(prediction_accuracy_index(df))
-    print(area_to_perimeter_ratio(df), area_to_perimeter_ratio.__name__)
-    print(type(area_to_perimeter_ratio), callable(area_to_perimeter_ratio))
+    print(hit_rate_auc(df), hit_rate_auc.__name__)
+    print(hit_rate_bin(df), hit_rate_bin.__name__)
     return
 
 

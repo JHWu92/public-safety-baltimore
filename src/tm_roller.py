@@ -171,8 +171,10 @@ def main():
     tmroller = TM_ROLLER(method, d911_by_cat, d911_y, vsd, ved, roll_step=vstep, eval_tw=vtw, verbose=2)
 
     metrics = [
-        # eval_metric.hit_rate, eval_metric.search_efficient_rate, eval_metric.prediction_accuracy_index,
-        eval_metric.area_to_perimeter_ratio
+        eval_metric.hit_rate_auc, eval_metric.search_efficient_rate_auc,
+        eval_metric.prediction_accuracy_index_auc, eval_metric.area_to_perimeter_ratio_auc,
+        eval_metric.hit_rate_bin, eval_metric.search_efficient_rate_bin,
+        eval_metric.prediction_accuracy_index_bin, eval_metric.area_to_perimeter_ratio_bin,
     ]
     res = tmroller.eval(metrics, grids)
     for m in metrics:
