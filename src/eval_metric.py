@@ -18,8 +18,30 @@ def auc_idx(len_obj, num_obs):
     return idx_for_auc, readable_index
 
 
+def bin_idx(risk, num):
+    mi, ma = risk.min(), risk.max()
+    iloc_idx, readable_idx = [], []
+    for i in range(num):
+        thres = mi + (ma - mi) * (1 - (i + 1) / num)
+        iloc_idx.append((risk >= thres).sum())
+        readable_idx.append('score>=%.2f' % thres)
+    return iloc_idx, readable_idx
+
+
+def get_idx(spatial_unit_attr, num, auc_or_bin='auc'):
+    if auc_or_bin =='auc':
+        len_obj = len(spatial_unit_attr)
+        return auc_idx(len_obj,num)
+    elif auc_or_bin =='bin':
+        risk = spatial_unit_attr[C.COL.risk]
+        return bin_idx(risk, num)
+    else:
+        raise ValueError('auc_or_bin should be one of: auc, bin')
+
+
 def hit_to_pai(spatial_unit_attr, event_normalized=False,
-               area_normalized=False, event_by_area=False):
+               area_normalized=False, event_by_area=False,
+               auc_or_bin='auc'):
     """Aggregate hit rate, search efficient rate and PAI
     into a parameter-controlled process
 
@@ -33,9 +55,10 @@ def hit_to_pai(spatial_unit_attr, event_normalized=False,
     """
 
     # auc index
-    num_grids = len(spatial_unit_attr)
+    # num_grids = len(spatial_unit_attr)
     # idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
-    idx_for_auc, readable_idx = auc_idx(num_grids, 10)
+    # iloc_idx, readable_idx = auc_idx(num_grids, 10)
+    iloc_idx, readable_idx = get_idx(spatial_unit_attr, auc_or_bin)
 
     tmp = spatial_unit_attr.sort_values(C.COL.risk, ascending=False)
     tmp[C.COL.area] /= 1e6
@@ -48,7 +71,7 @@ def hit_to_pai(spatial_unit_attr, event_normalized=False,
         tmp['cum_area'] = tmp[C.COL.area].cumsum() / area_factor
         res = tmp['hit'] / tmp['cum_area']
 
-    auc = res.iloc[idx_for_auc]
+    auc = res.iloc[iloc_idx]
     auc.index = readable_idx
     return auc
 
@@ -113,7 +136,7 @@ def hit_rate_old(spatial_unit_attr):
     return auc
 
 
-def search_efficient_rate_old(spatial_unit_attr):
+def search_efficient_rate_old(spatial_unit_attr, auc_or_bin='auc'):
     """Proposed by Bower et al 2004 (Bowers2004-gn):
     the number of crimes successfully predicted per kilometre-squared.
     Using a standardized index allows different procedures
@@ -125,37 +148,40 @@ def search_efficient_rate_old(spatial_unit_attr):
     :param spatial_unit_attr: pd.DataFrame,
         index=unit_index,
         columns: at least risk, num_events, area
+    :param auc_or_bin: which idx to use
     :return:
     """
     # auc index
-    num_grids = len(spatial_unit_attr)
+    # num_grids = len(spatial_unit_attr)
     # idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
-    idx_for_auc, readable_idx = auc_idx(num_grids, 10)
+    # idx_for_auc, readable_idx = auc_idx(num_grids, 10)
+    iloc_idx, readable_idx = get_idx(spatial_unit_attr, auc_or_bin)
 
     tmp = spatial_unit_attr.sort_values(C.COL.risk, ascending=False)
     tmp['cum_events'] = tmp[C.COL.num_events].cumsum()
     tmp['cum_area'] = tmp[C.COL.area].cumsum() / 1e6
 
     rate = tmp['cum_events'] / tmp['cum_area']
-    auc = rate.iloc[idx_for_auc]
+    auc = rate.iloc[iloc_idx]
     auc.index = readable_idx
 
     return auc
 
 
-def area_to_perimeter_ratio(spatial_unit_attr):
+def area_to_perimeter_ratio(spatial_unit_attr, auc_or_bin='auc'):
     """Proposed by bower-2004"""
     from shapely.ops import cascaded_union
     # auc index
-    num_grids = len(spatial_unit_attr)
+    # num_grids = len(spatial_unit_attr)
     # idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
-    idx_for_auc, readable_idx = auc_idx(num_grids, 10)
+    # idx_for_auc, readable_idx = auc_idx(num_grids, 10)
+    iloc_idx, readable_idx = get_idx(spatial_unit_attr, auc_or_bin)
 
     tmp = spatial_unit_attr.sort_values(C.COL.risk, ascending=False)
     tmp['cum_area'] = tmp[C.COL.area].cumsum()
 
     res = []
-    for idx, name in zip(idx_for_auc, readable_idx):
+    for idx, name in zip(iloc_idx, readable_idx):
         sub_units = tmp.iloc[:idx + 1]['geometry']
         perimeter = cascaded_union(sub_units).length
         cum_area = tmp.iloc[idx]['cum_area']
