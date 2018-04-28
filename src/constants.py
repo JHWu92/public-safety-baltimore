@@ -57,6 +57,17 @@ class PathDev:
     p911 = 'data/open-baltimore/clean/911-dev-set.csv'
 
 
+class PathTest:
+    """
+    path names of clean dev set data
+
+    Attributes
+    ----------
+    p911: 911 data
+    """
+    p911 = 'data/open-baltimore/clean/911-test-set.csv'
+
+
 class PathShape:
     """
     path names of shapefiles/geojson
