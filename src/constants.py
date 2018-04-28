@@ -42,7 +42,11 @@ class COL:
     area = 'Area'
 
 
-class PATH_DEV:
+class PathRaw:
+    crime = 'data/open-baltimore/raw/BPD_Part_1_Victim_Based_Crime_Data.csv'
+
+
+class PathDev:
     """
     path names of clean dev set data
 
@@ -53,7 +57,7 @@ class PATH_DEV:
     p911 = 'data/open-baltimore/clean/911-dev-set.csv'
 
 
-class Path_shape:
+class PathShape:
     """
     path names of shapefiles/geojson
 

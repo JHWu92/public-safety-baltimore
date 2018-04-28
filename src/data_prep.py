@@ -115,12 +115,20 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
     return clean
 
 
-def prep_911_by_category(path=None, from_epsg=4326, to_epsg=3559, verbose=0, coords_only=True):
-    """
-    the 911 data is cleaned, see clean_911.py for details
+def prep_911_by_category(path=None, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True, col_coords=True,
+                         gpdf=False, coords_series=True, verbose=0):
+    """load clean 911 data
+
+    :param path the 911 data with  should be cleaned by clean_911.py
+    :param from_epsg:
+    :param to_epsg:
+    :param gpdf:
+    :param verbose:
+    :param coords_series:
+    :return:
     """
     if path is None:
-        path = C.PATH_DEV.p911
+        path = C.PathDev.p911
     d911 = pd.read_csv(path, index_col=0)
     d911.index.name = C.COL.ori_index
 
@@ -141,13 +149,13 @@ def prep_911_by_category(path=None, from_epsg=4326, to_epsg=3559, verbose=0, coo
     d911 = d911.reset_index().set_index(C.COL.date)
 
     d911_by_cat = dict(tuple(d911.groupby(C.COL.category)))
-    if coords_only:
+    if coords_series:
         d911_by_cat = {name: data[C.COL.coords] for name, data in d911_by_cat.items()}
     return d911_by_cat
 
 
 def main():
-    d911_by_cat = prep_911_by_category(path='../'+C.PATH_DEV.p911, verbose=1)
+    d911_by_cat = prep_911_by_category(path='../'+C.PathDev.p911, verbose=1)
     for key, df in d911_by_cat.items():
         print('=======================')
         print(key)

@@ -154,7 +154,7 @@ def main():
     from src.spatial_unit import baltimore_grids
     from src import eval_metric
     from src.bsln_rtm import RTM
-    d911_by_cat = prep_911_by_category(path='../' + C.PATH_DEV.p911, verbose=1)
+    d911_by_cat = prep_911_by_category(path='../' + C.PathDev.p911, verbose=1)
     d911_by_cat = {key: d911_by_cat[key] for key in ['burglary', 'abuse']}
     # d911_coords = {name: data[C.COL.coords] for name, data in d911_by_cat.items()}
     d911_y = d911_by_cat['abuse']
