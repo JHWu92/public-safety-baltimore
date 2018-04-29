@@ -2,12 +2,13 @@
 from src import constants as C
 
 import pandas as pd
-
+import geopandas as gp
+from shapely.geometry import Point
 from pyproj import Proj, transform
 
 
-def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', from_epsg=4326, to_epsg=None,
-              col_type=None, keep_types=None, col_lon=None, col_lat=None, col_coords=None, verbose=0):
+def prep_data_from_raw(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', from_epsg=4326, to_epsg=None,
+                       col_type=None, keep_types=None, col_lon=None, col_lat=None, col_coords=None, verbose=0):
     """from raw data to ready-to-use data format
 
     1. sort data by date
@@ -15,10 +16,9 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
     3. remove rows without coordinates and get coords Series indexed by Date
     4. change to target CRS if specified
 
-    Return
-
     Parameters
     ----------
+
     raw: string, or pd.DataFrame instance, or gp.GeoDataFrame instance
         Raw data to be processed. The parameter can be:
 
@@ -29,14 +29,20 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
 
         - pd.DataFrame or gp.GeoDataFrame, loaded data
 
-    col_date: string, the name of the date column, default='Date'
-    date_format: string, the format to parse col_date, default='%m/%d/%Y'
+    col_date: string, default='Date'
+        the name of the date column,
+    date_format: string, default='%m/%d/%Y'
+        the format to parse col_date,
 
     col_type: string, default=None
     keep_types: string of list/tuple of strings, default None
         if col_type is not None, keep rows with types in keep_types
 
-    col_lon, col_lat, col_coords: strings, default None
+    col_lon: see col_coords
+
+    col_lat: see col_coords
+
+    col_coords : strings, default None
         indicating which column(s) has coordinates information
 
         - if 'geometry' is in columns, these 3 parameters are ignored
@@ -45,8 +51,15 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
 
         - elif col_coords is not None, use this column. Note that coords should be (lon, lat)
 
-    from_epsg, to_epsg: int, from_epsg default 4326, to_epsg default None
+    from_epsg: int,default 4326
+    to_epsg: int, default None
         if to_epsg is not None, the coords would be transformed from from_epsg to to_epsg
+
+
+    Examples
+    ----------
+    >>> crimes = prep_data_from_raw('data/open-baltimore/raw/BPD_Part_1_Victim_Based_Crime_Data.csv',
+    ...             col_lon='Longitude', col_lat='Latitude', col_date='CrimeDate', to_epsg=3559)
 
     """
 
@@ -115,26 +128,55 @@ def prep_data(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', fr
     return clean
 
 
-def prep_911_by_category(path=None, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True, col_coords=True,
-                         gpdf=False, coords_series=True, verbose=0):
+def prep_911(path=None, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True, col_coords=True,
+             by_category=True, gpdf=False, coords_series=True, verbose=0):
     """load clean 911 data
-
-    :param path the 911 data with  should be cleaned by clean_911.py
-    :param from_epsg:
-    :param to_epsg:
-    :param gpdf:
-    :param verbose:
-    :param coords_series:
-    :return:
+    :param path the 911 data which should be cleaned by clean_911.py. default src.constants.PathDev.p911
+    Other parameters see prep_clean_point_data()
     """
     if path is None:
         path = C.PathDev.p911
-    d911 = pd.read_csv(path, index_col=0)
-    d911.index.name = C.COL.ori_index
+    return prep_clean_point_data(path, from_epsg=from_epsg, to_epsg=to_epsg,
+                                 col_lat=col_lat, col_lon=col_lon, col_coords=col_coords,
+                                 by_category=by_category, gpdf=gpdf, coords_series=coords_series, verbose=verbose)
+
+
+def prep_clean_point_data(path, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True, col_coords=True,
+                          by_category=True, gpdf=False, coords_series=True, verbose=0):
+    """load clean point data
+
+    Parameters
+    ----------
+
+    :param path: cleaned point data, the column names are renamed as those in src.constants.COL
+
+    CRS related
+
+    :param from_epsg: int, epsg of raw data, default 4326
+    :param to_epsg: int, epsg of desired crs, e.g. equal distance. default 3559
+
+    what columns to keep, default all true
+
+    :param col_lat: if False, drop Latitude
+    :param col_lon: if False, drop Longitude
+    :param col_coords: if False and gpdf is True and coords_series not True, drop coords
+
+    types of return data
+
+    :param gpdf: defautl False, if True and coords_series not True, add geometry column and transform pd.DF into gp.GDF
+    :param by_category: default True, divide 911 data into dictionary with key=category and value=data in that category
+    :param coords_series: default True, return only series of coords.
+
+    other parameters
+
+    :param verbose: verbosity
+    """
+    data = pd.read_csv(path, index_col=0)
+    data.index.name = C.COL.ori_index
 
     # get coords Series
-    lons = d911[C.COL.lon].tolist()
-    lats = d911[C.COL.lat].tolist()
+    lons = data[C.COL.lon].tolist()
+    lats = data[C.COL.lat].tolist()
     # convert to to_epsg
     if verbose > 0:
         print('project to the to_epsg if specified', to_epsg)
@@ -142,25 +184,51 @@ def prep_911_by_category(path=None, from_epsg=4326, to_epsg=3559, col_lat=True, 
         from_proj = Proj(init='epsg:%d' % from_epsg)
         to_proj = Proj(init='epsg:%d' % to_epsg)
         lons, lats = transform(from_proj, to_proj, lons, lats)
-    d911[C.COL.coords] = list(zip(lons, lats))
+    data[C.COL.coords] = list(zip(lons, lats))
 
     # set Date as index
-    d911[C.COL.date] = pd.to_datetime(d911[C.COL.date], format=C.COL.date_format)
-    d911 = d911.reset_index().set_index(C.COL.date)
+    data[C.COL.date] = pd.to_datetime(data[C.COL.date], format=C.COL.date_format)
+    data = data.reset_index().set_index(C.COL.date)
 
-    d911_by_cat = dict(tuple(d911.groupby(C.COL.category)))
+    # drop redundant columns
+    if not col_lat:
+        data.drop(C.COL.lat, inplace=True)
+    if not col_lon:
+        data.drop(C.COL.lon, inplace=True)
+    if not col_coords and gpdf and not coords_series:
+        data.drop(C.COL.coords, inplace=True)
+
+    # transform to geopandas.GeoDataFrame
+    if gpdf and not coords_series:
+        data['geometry'] = data[C.COL.coords].apply(lambda x: Point(x[0], x[1]))
+        data = gp.GeoDataFrame(data)
+        data.crs = {'init': 'epsg:%d' % (to_epsg if to_epsg is not None else from_epsg), 'no_defs': True}
+        if verbose > 0: print('transformed to gpdf, crs=', data.crs)
+
+    # divide 911 by category
+    if by_category:
+        if verbose > 0: print('divide dataframe by category')
+        data = dict(tuple(data.groupby(C.COL.category)))
+
+    # key coords series only
     if coords_series:
-        d911_by_cat = {name: data[C.COL.coords] for name, data in d911_by_cat.items()}
-    return d911_by_cat
+        if verbose > 0: print('keep coords series only')
+        data = {name: data[C.COL.coords] for name, data in data.items()} if by_category else data[C.COL.coords]
+
+    return data
 
 
 def main():
-    d911_by_cat = prep_911_by_category(path='../'+C.PathDev.p911, verbose=1)
-    for key, df in d911_by_cat.items():
-        print('=======================')
-        print(key)
-        print('=======================')
-        print(df.head())
+    d911 = prep_911(path='../' + C.PathTest.p911, verbose=1, by_category=True, coords_series=False, gpdf=True)
+    if isinstance(d911, dict):
+        for key, df in d911.items():
+            print('=======================')
+            print(key, type(df))
+            print('=======================')
+            print(df.head())
+    else:
+        print(type(d911))
+        print(d911.head())
     return
 
 
