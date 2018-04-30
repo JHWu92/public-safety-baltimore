@@ -34,6 +34,7 @@ class COL:
     date_format = '%Y-%m-%d'
     time = 'Time'
     time_format = '%H:%M:%S'
+    datetime = 'DateTime'
     # spatial related
     lat = 'Latitude'
     lon = 'Longitude'

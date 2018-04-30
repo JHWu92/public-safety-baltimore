@@ -21,6 +21,7 @@ def main():
     from constants import COL
     print('loading data')
     df911 = pd.read_csv('raw/911_Police_Calls_for_Service.csv', sep=';')
+    # print(df911.head())
 
     print('preprocessing location and time')
     df911.location.fillna('NaN', inplace=True)
@@ -29,19 +30,20 @@ def main():
     df911[COL.lat] = df911[COL.coords].apply(lambda x: x[0] if x is not None else None)
     df911[COL.lon] = df911[COL.coords].apply(lambda x: x[1] if x is not None else None)
     # parse datetime
-    df911[COL.date] = df911['callDateTime'].apply(lambda x: x[:10])
-    df911[COL.date] = pd.to_datetime(df911[COL.date], format='%m/%d/%Y')
+    df911[COL.datetime] = pd.to_datetime(df911['callDateTime'], format='%m/%d/%Y %I:%M:%S %p')
+    df911[COL.date] = df911.DateTime.apply(lambda x: x.date())
+    df911[COL.time] = df911.DateTime.apply(lambda x: x.time())
 
     print('map categories')
     cmap = CatMapping('manual/911_categories.csv')
     df911[cmap.to_col] = cmap.apply_mapping(df911)
     df911_clean = df911[~(df911.Longitude.isnull()) & (df911.Category != 'undefined')] \
-        [['recordId', COL.date, COL.lat, COL.lon, 'description', 'Category', 'priority']] \
-        .sort_values('Date')
+        [['recordId', COL.datetime, COL.date, COL.lat, COL.lon, 'description', 'Category', 'priority']] \
+        .sort_values(COL.datetime)
 
     print('split dev/test set')
-    df911_clean[df911_clean.Date < pd.datetime.strptime('2017-01-01', '%Y-%m-%d')].to_csv('clean/911-dev-set.csv')
-    df911_clean[df911_clean.Date >= pd.datetime.strptime('2017-01-01', '%Y-%m-%d')].to_csv('clean/911-test-set.csv')
+    df911_clean[df911_clean[COL.datetime] < pd.datetime.strptime('2017-01-01', '%Y-%m-%d')].to_csv('clean/911-dev-set.csv')
+    df911_clean[df911_clean[COL.datetime] >= pd.datetime.strptime('2017-01-01', '%Y-%m-%d')].to_csv('clean/911-test-set.csv')
     return
 
 
