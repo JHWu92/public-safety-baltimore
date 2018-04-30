@@ -200,9 +200,9 @@ def prep_clean_point_data(path, from_epsg=4326, to_epsg=3559, col_lat=True, col_
         lons, lats = transform(from_proj, to_proj, lons, lats)
     data[C.COL.coords] = list(zip(lons, lats))
 
-    # set Date as index
-    data[C.COL.date] = pd.to_datetime(data[C.COL.date], format=C.COL.date_format)
-    data = data.reset_index().set_index(C.COL.date)
+    # set DateTime as index
+    data[C.COL.datetime] = pd.to_datetime(data[C.COL.date]+' '+data[C.COL.time], format=C.COL.datetime_format)
+    data = data.reset_index().set_index(C.COL.datetime)
 
     # drop redundant columns
     if not col_lat:
