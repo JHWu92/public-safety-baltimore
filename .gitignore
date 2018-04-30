@@ -146,3 +146,6 @@ $RECYCLE.BIN/
 data/open-baltimore/raw
 data/open-baltimore/clean
 ipython notebook in Baltimore.bat
+
+tmp/
+tmp.ipynb
