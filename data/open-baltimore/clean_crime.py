@@ -11,8 +11,8 @@ def main():
     crimes = pd.read_csv('raw/BPD_Part_1_Victim_Based_Crime_Data.csv')
     crimes = crimes[~((crimes.Longitude.isnull()) | (crimes.Latitude.isnull()))].copy()
     # parse datetime
-    crimes[COL.date] = crimes['CrimeDate']
-    crimes[COL.date] = pd.to_datetime(crimes[COL.date], format='%m/%d/%Y')
+    crimes[COL.date] = pd.to_datetime(crimes['CrimeDate'], format='%m/%d/%Y')
+    crimes.sort_values(COL.date, inplace=True)
 
     # There are some full-line duplicates
     crimes = crimes[~crimes.duplicated()].copy()

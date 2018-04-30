@@ -141,6 +141,19 @@ def prep_911(path=None, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True
                                  by_category=by_category, gpdf=gpdf, coords_series=coords_series, verbose=verbose)
 
 
+def prep_crime(path=None, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True, col_coords=True,
+               by_category=True, gpdf=False, coords_series=True, verbose=0):
+    """load clean 911 data
+     :param path the 911 data which should be cleaned by clean_911.py. default src.constants.PathDev.p911
+     Other parameters see prep_clean_point_data()
+     """
+    if path is None:
+        path = C.PathDev.crime
+    return prep_clean_point_data(path, from_epsg=from_epsg, to_epsg=to_epsg,
+                                 col_lat=col_lat, col_lon=col_lon, col_coords=col_coords,
+                                 by_category=by_category, gpdf=gpdf, coords_series=coords_series, verbose=verbose)
+
+
 def prep_clean_point_data(path, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True, col_coords=True,
                           by_category=True, gpdf=False, coords_series=True, verbose=0):
     """load clean point data
@@ -171,6 +184,7 @@ def prep_clean_point_data(path, from_epsg=4326, to_epsg=3559, col_lat=True, col_
 
     :param verbose: verbosity
     """
+    if verbose > 0: print('loading data from:', path)
     data = pd.read_csv(path, index_col=0)
     data.index.name = C.COL.ori_index
 

@@ -56,6 +56,7 @@ class PathDev:
     p911: 911 data
     """
     p911 = 'data/open-baltimore/clean/911-dev-set.csv'
+    crime = 'data/open-baltimore/clean/crimes-dev-set.csv'
 
 
 class PathTest:
@@ -67,6 +68,7 @@ class PathTest:
     p911: 911 data
     """
     p911 = 'data/open-baltimore/clean/911-test-set.csv'
+    crime = 'data/open-baltimore/clean/crimes-test-set.csv'
 
 
 class PathShape:
