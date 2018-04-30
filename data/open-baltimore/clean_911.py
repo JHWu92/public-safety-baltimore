@@ -38,12 +38,14 @@ def main():
     cmap = CatMapping('manual/911_categories.csv')
     df911[cmap.to_col] = cmap.apply_mapping(df911)
     df911_clean = df911[~(df911.Longitude.isnull()) & (df911.Category != 'undefined')] \
-        [['recordId', COL.datetime, COL.date, COL.lat, COL.lon, 'description', 'Category', 'priority']] \
+        [['recordId', COL.datetime, COL.date, COL.time, COL.lat, COL.lon, 'description', 'Category', 'priority']] \
         .sort_values(COL.datetime)
 
     print('split dev/test set')
-    df911_clean[df911_clean[COL.datetime] < pd.datetime.strptime('2017-01-01', '%Y-%m-%d')].to_csv('clean/911-dev-set.csv')
-    df911_clean[df911_clean[COL.datetime] >= pd.datetime.strptime('2017-01-01', '%Y-%m-%d')].to_csv('clean/911-test-set.csv')
+    df911_clean[df911_clean[COL.datetime] < pd.datetime.strptime('2017-01-01', '%Y-%m-%d')]\
+        .drop(COL.datetime, axis=1).to_csv('clean/911-dev-set.csv')
+    df911_clean[df911_clean[COL.datetime] >= pd.datetime.strptime('2017-01-01', '%Y-%m-%d')]\
+        .drop(COL.datetime, axis=1).to_csv('clean/911-test-set.csv')
     return
 
 
