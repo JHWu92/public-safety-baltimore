@@ -21,7 +21,7 @@ class CatMapping:
         self.to_col = mapping.columns[0]
         self.from_col = mapping.columns[1]
         self.mapping = mapping
-        self.mapping_dict = {x[1]: x[0] for _, x in mapping.iterrows()}
+        self.mapping_dict = {x[1].strip(): x[0].strip() for _, x in mapping.iterrows()}
 
         if verbose > 0:
             print('mapping raw types in column %s to categories in column %s' % (self.from_col, self.to_col))
