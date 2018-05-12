@@ -1,175 +1,176 @@
 Category,description
 abuse,pEACE ORDER
-abuse,*PROTECTIVE ORDE
-abuse,*PROTECTION ORDE
-abuse,*PROTECTIVE ORD
-abuse,*PROT ORDER
+abuse,*PROT. ORDER
+abuse,PEACE  ORDER
+abuse,PROTECTIVE ORDE
+abuse,pROTECT ORDER
 abuse,PEACE ORDER
 abuse,PROTECT ORDER
 abuse,PROTECTIVE ORDER
+abuse,PROT. ORDER
 abuse,PROT  ORDER
 abuse,PROT ORDER
 abuse,PEACE
 abuse,PROTECTION
 abuse,PROTECTIVE
+abuse,SERVE PEACE ORDE
 abuse,PROTECTION ORDER
-abuse,*PROTECT ORDER
-abuse,*PEACE ORDER
 abuse,PEACE ORDERS
 abuse,PROTECTIVE ORD
-abuse,PEACE  ORDER
+abuse,*PEACE ORDER
+abuse,*PROTECT ORDER
 abuse,PROTECTED ORDER
-abuse,*PROT. ORDER
-abuse,SERVE PEACE ORDE
-abuse,PROTECTIVE ORDE
-abuse,pROTECT ORDER
-abuse,*PROTECTIVE
-abuse,*PROT ORDERS
-abuse,PROT. ORDER
+abuse,*PROTECTIVE ORD
+abuse,*PROTECTION ORDE
 abuse,PROT ORDERS
+abuse,*PROTECTIVE ORDE
 abuse,PROTECT ORDERS
+abuse,*PROTECTIVE
 abuse,PROTECTION ORDE
 abuse,*PEACE ORDERS
+abuse,*PROT ORDER
+abuse,*PROT ORDERS
 arson,*ARSON
 arson,ARSON
+assault,COMMON ASSAULT
+assault,*ASSAULT
 assault,AGGRAV ASSAULT
 assault,Aggrav Assault
-assault,COMMON ASSAULT
 assault,Common Assault
-assault,*ASSAULT
 assault,ASSAULT
+burglary,POSS PROWLER
+burglary,BURGLARY ATTEMPT
 burglary,POSS BURGLARY
 burglary,ATTMPT BURGLARY
-burglary,BURGLARY
-burglary,ATTEMPT BURGLARY
-burglary,BURGLARY/POSS
-burglary,Burglary
-burglary,POSS PROWLER
 burglary,Prowler
-burglary,*PROWLER
-burglary,*POSS BURGLARY
-burglary,BURGLARY ATTEMPT
 burglary,PROWLER
+burglary,BURGLARY/POSS
+burglary,*PROWLER
+burglary,BURGLARY
+burglary,*POSS BURGLARY
+burglary,ATTEMPT BURGLARY
+burglary,Burglary
+disorderly conduct,Loud Music
+disorderly conduct,*JUV DISTURBANCE
+disorderly conduct,Juv Disturbance
 disorderly conduct,Lying in Street
 disorderly conduct,Intoxicated Pers
-disorderly conduct,Juv Disturbance
 disorderly conduct,Disorderly
+disorderly conduct,Street Obstruct
+disorderly conduct,LOUD MUSIC/NOISE
+disorderly conduct,INTOXICATED PERS
+disorderly conduct,DISORDERLY
 disorderly conduct,LOUD MUSIC
 disorderly conduct,STREET OBSTRUCT
 disorderly conduct,LYING IN STREET
 disorderly conduct,JUV DISTURBANCE
-disorderly conduct,Street Obstruct
-disorderly conduct,*JUV DISTURBANCE
-disorderly conduct,DISORDERLY
-disorderly conduct,LOUD MUSIC/NOISE
 disorderly conduct,ANIMAL CRUELTY
-disorderly conduct,INTOXICATED PERS
-disorderly conduct,Loud Music
-insecurity,ECORT
-insecurity,POSS ARMD PERSON
-insecurity,ESCOURT
-insecurity,WARRANT SERVICE
-insecurity,Silent Alarm
-insecurity,Destruct Propty
-insecurity,Suspicious Pers
-insecurity,*POLICE ESCORT
-insecurity,Armed Person
-insecurity,Search& seizure
-insecurity,Subject stop
-insecurity,Wanted on Warr
+insecurity,Injured Person
+insecurity,AUDIBLE ALARM
 insecurity,Holdup Alarm
-insecurity,*SUSPICIOUS VEH
+insecurity,ARMED PERSON
+insecurity,Wanted on Warr
+insecurity,Warrant Service
+insecurity,Subject stop
+insecurity,Search& seizure
+insecurity,Audible Alarm
+insecurity,Suspicious Pers
+insecurity,Destruct Propty
+insecurity,Silent Alarm
+insecurity,Foot Patrol
+insecurity,Armed Person
+insecurity,INJURED PERSON
+insecurity,*ESCORT
+insecurity,WARRANT SERVICE
+insecurity,Field Interview
+insecurity,WANTED ON WARR
 insecurity,WARRANTS
 insecurity,Subject Stop
 insecurity,*AUDIBLE ALARM
+insecurity,HOLDUP ALARM
 insecurity,*WARRANTS
-insecurity,*SUSPICIOUS PERS
-insecurity,*ESCORT
-insecurity,*WARRANT
 insecurity,*ARMED PERSON
-insecurity,Audible Alarm
-insecurity,Injured Person
+insecurity,*WARRANT
+insecurity,*SUSPICIOUS VEH
+insecurity,SUSPICIOUS PERS
+insecurity,DESTRUCT PROPTY
+insecurity,*POLICE ESCORT
+insecurity,*SUSPICIOUS PERS
+insecurity,ESCOURT
 insecurity,SILENT ALARM
+insecurity,POLICE ESCORT
+insecurity,Foot  Patrol
+insecurity,POLICE  ESCORT
+insecurity,SEARCH&SEIZURE
+insecurity,INV STOP
+insecurity,ESCORT NEEDED
+insecurity,SUSPICIOUS VEH
+insecurity,WARRANT
+insecurity,Repairs/Service
 insecurity,PATROL
 insecurity,ESCORT
-insecurity,POLICE ESCORT
-insecurity,Warrant Service
+insecurity,NEED ESCORT
 insecurity,DESTRUCT PROP
 insecurity,Escort
-insecurity,NEED ESCORT
-insecurity,SUSPICIOUS VEH
-insecurity,ESCORT NEEDED
-insecurity,SEARCH&SEIZURE
-insecurity,ARMED PERSON
-insecurity,AUDIBLE ALARM
-insecurity,INV STOP
-insecurity,HOLDUP ALARM
-insecurity,INJURED PERSON
-insecurity,Foot  Patrol
-insecurity,Repairs/Service
-insecurity,SUSPICIOUS PERS
-insecurity,Field Interview
-insecurity,POLICE  ESCORT
-insecurity,DESTRUCT PROPTY
-insecurity,WANTED ON WARR
-insecurity,WARRANT
-mental case,Mental Case
+insecurity,POSS ARMD PERSON
+insecurity,ECORT
 mental case,MENTAL CASE
 mental case,POSS MENTAL CASE
+mental case,Mental Case
 missing person,Missing Person
-missing person,MISSING PERSON
 missing person,*MISSING PERSON
-other offense,FALSE PRETENSE
-other offense,Cutting
-other offense,GAMBLING
-other offense,ProstitutionComp
-other offense,*BY THEAT
-other offense,Gambling
-other offense,*THREATS
-other offense,CUTTING
-other offense,BY TYHREAT
-other offense,*BY THREATS
-other offense,*VERBAL THREAT
-other offense,BY THREAT
+missing person,MISSING PERSON
 other offense,PROSTITUTION
-other offense,*THREAT
-other offense,*BY THREAT
-other offense,VERBAL THREATS
-other offense,BY  THREATS
+other offense,FALSE PRETENSE
+other offense,BY TYHREAT
+other offense,ProstitutionComp
+other offense,Cutting
 other offense,**THREAT**
-other offense,BY THREATS
-other offense,BYTHREAT
-other offense,THREATS
+other offense,Gambling
+other offense,*BY THEAT
+other offense,VERBAL THREATS
 other offense,BY  THREAT
+other offense,GAMBLING
+other offense,*THREAT
+other offense,BY THREATS
+other offense,False Pretense
+other offense,BY THREAT
 other offense,ASSAULT BY THREA
 other offense,THREAT
-other offense,BY THEAT
-other offense,VERBAL THREAT
-other offense,False Pretense
+other offense,CUTTING
 other offense,BY PHONE THREAT
+other offense,VERBAL THREAT
+other offense,*BY THREAT
+other offense,BY  THREATS
+other offense,BY THEAT
+other offense,THREATS
+other offense,*VERBAL THREAT
+other offense,BYTHREAT
+other offense,*THREATS
+other offense,*BY THREATS
 robbery,ROBBERY ARMED
 robbery,Robbery Unarmed
-robbery,Robbery Armed
 robbery,ROBBERY UNARMED
-shooting,DISCHRG FIREARM
-shooting,GUN
+robbery,Robbery Armed
+shooting,HANDGUN VIOLATIO
 shooting,*GUN
-shooting,SHOOTING
+shooting,DISCHRG FIREARM
 shooting,Shooting
 shooting,Dischrg Firearm
-shooting,HANDGUN VIOLATIO
-theft_larceny,BIKE LARCENY
-theft_larceny,LARCENY OF TRUST
-theft_larceny,LARCENY
-theft_larceny,Car Jacking
-theft_larceny,CAR JACKING
-theft_larceny,POSS LARCENY
-theft_larceny,Larceny f/Auto
-theft_larceny,POSS AUTO THEFT
-theft_larceny,Larceny
-theft_larceny,LARCENCY A/TRUST
-theft_larceny,LARCENY F/AUTO
-theft_larceny,AUTO THEFT
-theft_larceny,Auto Theft
+shooting,GUN
+shooting,SHOOTING
 theft_larceny,LARCENCY
+theft_larceny,LARCENY OF TRUST
+theft_larceny,Auto Theft
+theft_larceny,Larceny f/Auto
+theft_larceny,LARCENY
+theft_larceny,BIKE LARCENY
+theft_larceny,CAR JACKING
+theft_larceny,LARCENCY A/TRUST
+theft_larceny,AUTO THEFT
 theft_larceny,Bike Larceny
+theft_larceny,POSS AUTO THEFT
+theft_larceny,Car Jacking
+theft_larceny,LARCENY F/AUTO
+theft_larceny,POSS LARCENY
+theft_larceny,Larceny

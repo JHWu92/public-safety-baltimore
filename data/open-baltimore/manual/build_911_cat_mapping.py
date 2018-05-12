@@ -37,7 +37,7 @@ DROP_IRRELEVANT = [
 ]
 TBD_IRRELEVANT = [
     # police related?
-    'investigate', 'investigate auto', 'foot patrol',
+    'investigate', 'investigate auto', 
     'check well being', 'check wellbeing', 'chk well being', 'ck well being',
     'business check', 'bank check', 'follow up',
     # lost and found
