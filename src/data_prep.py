@@ -9,7 +9,8 @@ from pyproj import Proj, transform
 
 def prep_data_from_raw(raw, cached_path=None, col_date='Date', date_format='%m/%d/%Y', from_epsg=4326, to_epsg=None,
                        col_type=None, keep_types=None, col_lon=None, col_lat=None, col_coords=None, verbose=0):
-    """from raw data to ready-to-use data format
+    """ SHOULD BE DEPRECATED, used only in tm_roller.ipynb
+    from raw data to ready-to-use data format
 
     1. sort data by date
     2. keep targeted types of data if col_type is specified
