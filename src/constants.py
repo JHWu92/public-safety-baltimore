@@ -44,32 +44,25 @@ class COL:
     area = 'Area'
 
 
-class PathRaw:
-    crime = 'data/open-baltimore/raw/BPD_Part_1_Victim_Based_Crime_Data.csv'
-
-
-class PathDev:
+class PathData:
     """
-    path names of clean dev set data
+    path names of data
 
-    Attributes
+    Attributes (prefix: [raw/train/dev/test]_)
     ----------
-    p911: 911 data
+    crime: part 1 victim based crime
+    911: 911 data
     """
-    p911 = 'data/open-baltimore/clean/911-dev-set.csv'
-    crime = 'data/open-baltimore/clean/crimes-dev-set.csv'
-
-
-class PathTest:
-    """
-    path names of clean dev set data
-
-    Attributes
-    ----------
-    p911: 911 data
-    """
-    p911 = 'data/open-baltimore/clean/911-test-set.csv'
-    crime = 'data/open-baltimore/clean/crimes-test-set.csv'
+    # crime
+    raw_crime = 'data/open-baltimore/raw/BPD_Part_1_Victim_Based_Crime_Data.csv'
+    train_crime = 'data/open-baltimore/clean/train-crime-victim-based-part1.csv'
+    dev_crime = 'data/open-baltimore/clean/dev-crime-victim-based-part1.csv'
+    test_crime = 'data/open-baltimore/clean/test-crimes-victim-based-part1.csv'
+    # 911
+    raw_911 = 'data/open-baltimore/raw/911_Police_Calls_for_Service.csv'
+    train_911 = 'data/open-baltimore/clean/train-911.csv'
+    dev_911 = 'data/open-baltimore/clean/dev-911.csv'
+    test_911 = 'data/open-baltimore/clean/test-911.csv'
 
 
 class PathShape:
@@ -81,3 +74,42 @@ class PathShape:
     cityline: the cityline of Baltimore
     """
     cityline = 'data/open-baltimore/raw/Baltcity_Line/baltcity_line.shp'
+
+
+class DateTimeRelated:
+    """ Datetime related constants
+
+        Attributes:
+        ----------
+        time_format: string
+            the string format of Time column
+        date_format: string
+            the string format of Date column
+        train_sd: datetime.datetime
+            train set start date
+        train_ed: datetime.datetime
+            train set end date
+        dev_sd: datetime.datetime
+            dev set start date
+        dev_ed: datetime.datetime
+            dev set end date
+        test_sd: datetime.datetime
+            test set start date
+        test_ed: datetime.datetime
+            test set end date
+    """
+    from datetime import datetime as dt
+    time_format = '%H:%M:%S'
+    date_format = '%Y-%m-%d'
+    datetime_format = '%s %s' %(date_format, time_format)
+
+    train_sd = dt.strptime('2012-07-01', date_format)
+    train_ed = dt.strptime('2016-07-01', date_format)
+    dev_sd = train_ed
+    dev_ed = dt.strptime('2017-07-01', date_format)
+    test_sd = dev_ed
+    test_ed = dt.strptime('2018-07-01', date_format)
+
+
+if __name__ == '__main__':
+    print(DateTimeRelated.train_sd, type(DateTimeRelated.train_sd))
