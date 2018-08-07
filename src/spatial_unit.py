@@ -3,7 +3,7 @@ import geopandas as gp
 from src import constants as C
 
 
-def get_grids(shape, grid_size=200, crs=None):
+def get_grids(shape, grid_side=200, crs=None):
     from shapely.geometry import Polygon, LineString, box
     import numpy as np
 
@@ -27,7 +27,7 @@ def get_grids(shape, grid_size=200, crs=None):
     else:
         raise ValueError('shape is not bbox tuple, closed LineString or Polygon')
 
-    grid_lon, grid_lat = np.mgrid[lon_min:lon_max:grid_size, lat_min:lat_max:grid_size]
+    grid_lon, grid_lat = np.mgrid[lon_min:lon_max:grid_side, lat_min:lat_max:grid_side]
     grids_poly = []
 
     for j in range(grid_lat.shape[1] - 1):
@@ -44,16 +44,16 @@ def get_grids(shape, grid_size=200, crs=None):
         while grids.crs is None:
             grids.crs = crs
 
-    grids[C.COL.area] = grid_size**2
+    grids[C.COL.area] = grids.geometry.apply(lambda x: x.area)
     return grids
 
 
-def baltimore_grids(grid_size=200, cityline_path=None):
+def baltimore_grids(grid_side=200, cityline_path=None):
     if cityline_path is None:
         cityline_path = C.Path_shape.cityline
     cityline = gp.read_file(cityline_path)
     cityline = cityline.to_crs(epsg=3559)
-    grids = get_grids(cityline.geometry[0], grid_size, crs=cityline.crs)
+    grids = get_grids(cityline.geometry[0], grid_side, crs=cityline.crs)
     return grids
 
 
