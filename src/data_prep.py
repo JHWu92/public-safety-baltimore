@@ -132,11 +132,11 @@ def prep_data_from_raw(raw, cached_path=None, col_date='Date', date_format='%m/%
 def prep_911(path=None, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True, col_coords=True,
              by_category=True, gpdf=False, coords_series=True, verbose=0):
     """load clean 911 data
-    :param path the 911 data which should be cleaned by clean_911.py. default src.constants.PathDev.p911
+    :param path the 911 data which should be cleaned by clean_911.py. default src.constants.PathData.tr_911
     Other parameters see prep_clean_point_data()
     """
     if path is None:
-        path = C.PathDev.p911
+        path = C.PathData.tr_911
     return prep_clean_point_data(path, from_epsg=from_epsg, to_epsg=to_epsg,
                                  col_lat=col_lat, col_lon=col_lon, col_coords=col_coords,
                                  by_category=by_category, gpdf=gpdf, coords_series=coords_series, verbose=verbose)
@@ -145,11 +145,11 @@ def prep_911(path=None, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True
 def prep_crime(path=None, from_epsg=4326, to_epsg=3559, col_lat=True, col_lon=True, col_coords=True,
                by_category=True, gpdf=False, coords_series=True, verbose=0):
     """load clean 911 data
-     :param path the 911 data which should be cleaned by clean_911.py. default src.constants.PathDev.p911
+     :param path the 911 data which should be cleaned by clean_911.py. default src.constants.PathData.tr_crime
      Other parameters see prep_clean_point_data()
      """
     if path is None:
-        path = C.PathDev.crime
+        path = C.PathData.tr_crime
     return prep_clean_point_data(path, from_epsg=from_epsg, to_epsg=to_epsg,
                                  col_lat=col_lat, col_lon=col_lon, col_coords=col_coords,
                                  by_category=by_category, gpdf=gpdf, coords_series=coords_series, verbose=verbose)

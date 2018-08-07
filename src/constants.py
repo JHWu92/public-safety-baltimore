@@ -55,14 +55,14 @@ class PathData:
     """
     # crime
     raw_crime = 'data/open-baltimore/raw/BPD_Part_1_Victim_Based_Crime_Data.csv'
-    train_crime = 'data/open-baltimore/clean/train-crime-victim-based-part1.csv'
-    dev_crime = 'data/open-baltimore/clean/dev-crime-victim-based-part1.csv'
-    test_crime = 'data/open-baltimore/clean/test-crimes-victim-based-part1.csv'
+    tr_crime = 'data/open-baltimore/clean/train-crime-victim-based-part1.csv'
+    de_crime = 'data/open-baltimore/clean/dev-crime-victim-based-part1.csv'
+    te_crime = 'data/open-baltimore/clean/test-crimes-victim-based-part1.csv'
     # 911
     raw_911 = 'data/open-baltimore/raw/911_Police_Calls_for_Service.csv'
-    train_911 = 'data/open-baltimore/clean/train-911.csv'
-    dev_911 = 'data/open-baltimore/clean/dev-911.csv'
-    test_911 = 'data/open-baltimore/clean/test-911.csv'
+    tr_911 = 'data/open-baltimore/clean/train-911.csv'
+    de_911 = 'data/open-baltimore/clean/dev-911.csv'
+    te_911 = 'data/open-baltimore/clean/test-911.csv'
 
 
 class PathShape:
