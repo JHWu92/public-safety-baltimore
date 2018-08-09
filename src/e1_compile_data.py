@@ -35,8 +35,10 @@ LOAD_FUNCS = {'crime': load_crime, '911': load_911}
 
 
 class Data:
-    """
-    Attributes
+    """Data object for storing train and dev set
+
+    Attributes:
+    ----------
 
     tr: dict
         training set.
@@ -86,6 +88,36 @@ class Data:
 
 
 class CompileData:
+    """module for compiling data for next step
+
+    Attributes:
+    ----------
+
+    data_x: Data object.
+        train and dev set for X
+
+    data_y: Data object.
+        train and dev set for Y
+
+    data_context: Data object?
+        atemporal context data (e.g., POI, landuse)
+
+    verbose: int.
+        level of verbosity.
+
+    y_dev: dict (key=dname, value=GDF)
+        dev set for y
+
+    y_train: dict (key=dname, value=GDF)
+        train set for y
+
+    x_dev: dict (key=dname, value=GDF)
+        dev set for x
+
+    x_train: dict (key=dname, value=GDF)
+        train set for x
+    """
+
     def __str__(self):
         return ('Compile Data Module:\n'
                 '\t- {x_setting}\n'
@@ -172,6 +204,13 @@ class CompileData:
             key: dname;
             value: list of groups of categories.
             define categories that should be treated as groups for each dname.
+
+        Examples:
+        ----------
+
+        >>> compile_data.set_x(['crime', '911'], by_category=[True, False],
+        ...               category_groups={'crime': [['burglary', 'theft_larceny']]})
+
         """
         if not isinstance(by_category, (tuple, list)):
             by_category = [by_category] * len(dnames)
@@ -224,6 +263,14 @@ class CompileData:
     def y_dev(self):
         return self.data_y.de
 
+    @property
+    def x_train(self):
+        return self.data_x.tr
+
+    @property
+    def x_dev(self):
+        return self.data_x.de
+
 
 if __name__ == "__main__":
     import os
@@ -234,6 +281,9 @@ if __name__ == "__main__":
     compile_data.set_y('crime')
     compile_data.set_y('crime/burglary')
     compile_data.set_y('crime/burglary+robbery')
-    compile_data.set_x(['crime', '911'], by_category=[True, False]
-                       # , category_groups={'crime': [['burglary', 'theft_larceny']]}
-                       )
+    compile_data.set_x(['crime', '911'], by_category=[True, False],
+                       category_groups={'crime': [['burglary', 'theft_larceny']]})
+    # compile_data.set_x(['crime', '911'], by_category=[True, False])
+    # compile_data.set_x(['crime', '911'], category_groups={'crime': [['burglary', 'theft_larceny']]})
+    # compile_data.set_x(['crime', '911'], by_category=False,
+    #                    category_groups={'crime': [['burglary', 'theft_larceny']]})
