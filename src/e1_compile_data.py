@@ -38,14 +38,10 @@ class Data:
 
     def __str__(self):
         if self.tr_de_paired:
-            paired = 'paired'
-            keys = list(self.tr.keys())
+            keys = 'train/dev: %s' % list(self.tr.keys())
         else:
-            paired = 'not paired'
-            keys = 'tr=%s, de=%s' % (list(self.tr.keys()), list(self.de.keys()))
-        return "Data {name} - {paired}; dnames: {keys}".format(
-            name=self.name, paired=paired, keys=keys
-        )
+            keys = 'train: %s, dev: %s' % (list(self.tr.keys()), list(self.de.keys()))
+        return "Data {name}, dname of {keys}".format(name=self.name, keys=keys)
 
     def __init__(self, name):
         self.tr = {}
@@ -78,7 +74,10 @@ class Data:
 
 class CompileData:
     def __str__(self):
-        return 'Compile Data'
+        return ('Compile Data Module:\n'
+                '\t- {y_setting}\n'
+                ''.format(y_setting=self.data_y)
+                )
 
     def __init__(self, verbose=0):
         self.data_context = Data('context')
@@ -145,7 +144,7 @@ class CompileData:
         if self.verbose >= 1:
             print('set data for y, dname/categories=%s' % dname_cat)
 
-    def set_x(self, dnames, catogories=None):
+    def set_x(self, dnames, by_catogory=True):
         pass
 
     @property
