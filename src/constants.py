@@ -35,7 +35,7 @@ class COL:
     time = 'Time'
     time_format = '%H:%M:%S'
     datetime = 'DateTime'
-    datetime_format = date_format + ' ' +time_format
+    datetime_format = date_format + ' ' + time_format
     # spatial related
     lat = 'Latitude'
     lon = 'Longitude'
@@ -63,6 +63,21 @@ class PathData:
     tr_911 = 'data/open-baltimore/clean/train-911.csv'
     de_911 = 'data/open-baltimore/clean/dev-911.csv'
     te_911 = 'data/open-baltimore/clean/test-911.csv'
+
+    as_dict = {
+        'train': {
+            'crime': tr_crime,
+            '911': tr_911,
+        },
+        'dev': {
+            'crime': de_crime,
+            '911': de_911,
+        },
+        'test': {
+            'crime': te_crime,
+            '911': te_911,
+        }
+    }
 
 
 class PathShape:
@@ -101,7 +116,7 @@ class DateTimeRelated:
     from datetime import datetime as dt
     time_format = '%H:%M:%S'
     date_format = '%Y-%m-%d'
-    datetime_format = '%s %s' %(date_format, time_format)
+    datetime_format = '%s %s' % (date_format, time_format)
 
     train_sd = dt.strptime('2012-07-01', date_format)
     train_ed = dt.strptime('2016-07-01', date_format)
