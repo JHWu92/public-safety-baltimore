@@ -27,7 +27,7 @@ def get_grids(shape, grid_side=200, crs=None):
     else:
         raise ValueError('shape is not bbox tuple, closed LineString or Polygon')
 
-    grid_lon, grid_lat = np.mgrid[lon_min:lon_max:grid_side, lat_min:lat_max:grid_side]
+    grid_lon, grid_lat = np.mgrid[lon_min:lon_max+grid_side:grid_side, lat_min:lat_max+grid_side:grid_side]
     grids_poly = []
 
     for j in range(grid_lat.shape[1] - 1):
