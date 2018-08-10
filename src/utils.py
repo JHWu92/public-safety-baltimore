@@ -1,7 +1,11 @@
 import re
-from src.constants import DateTimeRelated as dtr
+from src.constants import DateTimeRelated as dtr, COL
 import datetime
 
+
+# ==========================
+# clean data related
+# ==========================
 def reg_check_time_format(time_str):
     """ fast reg check if a time string possibly matched format %H:%M:%S
     if False, it doesn't match
@@ -14,6 +18,9 @@ def reg_check_date_format(date_str):
     return bool(re.match('\d{4}-\d{1,2}-\d{1,2}', date_str))
 
 
+# ==========================
+# Datetime related
+# ==========================
 def parse_date_str(text):
     for fmt in (dtr.datetime_format, dtr.date_format):
         try:
@@ -22,6 +29,24 @@ def parse_date_str(text):
             pass
     raise ValueError('no valid date format found')
 
+
+# ==========================
+# DataFrame related
+# ==========================
+def df_categories(df):
+    return df[COL.category].unique()
+
+
+def subdf_by_categories(df, categories):
+    """
+
+    :param df:
+    :param categories: str, or list
+    :return:
+    """
+    if isinstance(categories, str):
+        return df[df[COL.category] == categories]
+    return df[df[COL.category].isin(categories)]
 
 if __name__ == "__main__":
     print(reg_check_time_format('242'))
