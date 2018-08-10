@@ -1,5 +1,9 @@
-from src.constants import PathData, COL
+import datetime
 from itertools import chain
+
+import pandas as pd
+
+from src.constants import PathData, COL
 from src.data_prep import prep_911, prep_crime
 
 
@@ -49,6 +53,9 @@ class Data:
         dev set.
         key: dname (name, or name/category, or name/c1+c2...);
         value: GeoDataFrame
+
+    tr_de_paired: bool.
+        if the keys of train and dev set is the same.
     """
 
     def __str__(self):
@@ -58,10 +65,19 @@ class Data:
             keys = 'train: %s, dev: %s' % (list(self.tr.keys()), list(self.de.keys()))
         return "Data {name}, dname of {keys}".format(name=self.name, keys=keys)
 
-    def __init__(self, name):
+    def __init__(self, name, atemporal=False, verbose=0):
         self.tr = {}
         self.de = {}
         self.name = name
+        self.rolled = False
+        self.atemporal = atemporal
+        self.verbose = verbose
+
+    def get_tr_de(self, dname):
+        self.assert_paired('get_tr_de(dname=%s' % dname)
+        if dname not in self.tr:
+            raise ValueError('get_tr_de: Data %s has not been loaded')
+        return self.tr[dname], self.de[dname]
 
     def set_tr_de(self, dname, tr, de):
         self.assert_paired('set_tr_de(dname=%s)' % dname)
@@ -85,6 +101,94 @@ class Data:
         if dname:
             return df_categories(data[dname])
         return {name: df_categories(data[name]) for name in data.keys()}
+
+    @property
+    def time_range(self):
+        """
+        :return: time_range of each dset of each dname, pd.DF
+            columns = ['dset', 'dname', COL.dt_from, COL.dt_to]
+        """
+        if self.atemporal:
+            raise AttributeError('Atemporal data has no time range')
+        trange = []
+        for dname in self.tr.keys():
+            tr, de = self.get_tr_de(dname)
+            trfrom, trto = min(tr.index), max(tr.index)
+            trange.append(['tr', dname, trfrom, trto])
+            defrom, deto = min(de.index), max(de.index)
+            trange.append(['de', dname, defrom, deto])
+        return pd.DataFrame(trange, columns=['dset', 'dname', COL.dt_from, COL.dt_to])
+
+    def roll_de_to_tr(self, start_from, before=None, tw=None):
+        """Roll data from dev set to train set during rolling experiment.
+        If atemporal=True, raise AttributeError
+
+        The datetime range of the data to be rolled is:
+            - If before is not None: [start_from, before); (1 second before the 'before' datetime will be rolled)
+            - elif before is None and tw is not None: [start_from, start_from+tw days);
+            - else: raise ValueError
+
+        After moving, sort train's index again to make sure the index is sorted.
+
+        :param start_from: datetime.datetime
+            the start datetime of the rolling.
+            <= the From datetime of all the dev set (<=min(de.From))
+            > the To datetime of all the train set (: >max(tr.To))
+        :param before: datetime.datetime
+            the before datetime of the rolling.
+        :param tw: int
+            the number of days from start_from of the rolling.
+        :return:
+        """
+        if self.atemporal:
+            raise AttributeError('Atemporal data cannot be rolled')
+
+        # # handle start_from and before datetime
+        # TODO: 1. allow start_from, before to be string
+        # 2. check start_from date
+        trange = self.time_range
+        min_defrom = trange[trange.dset == 'de'][COL.dt_from].min()
+        max_trto = trange[trange.dset == 'tr'][COL.dt_to].max()
+        if not start_from <= min_defrom:
+            raise ValueError('The start_from (%s) should be <= min(de.From) (%s)' % (start_from, min_defrom))
+        if not start_from > max_trto:
+            raise ValueError('The start_from (%s) should be > max(tr.To) (%s)' % (start_from, max_trto))
+        # 3. get before from the tw parameter
+        if before is None:
+            if tw is None:
+                raise ValueError('either before or tw has to be specified')
+            if not isinstance(tw, int):
+                raise ValueError('tw must be int, now tw is %s' % type(tw))
+            before = start_from + datetime.timedelta(days=tw)
+        # 4. subtract 1 second from before, to make sure the time range to roll is [start_from, before).
+        before = before - datetime.timedelta(seconds=1)
+        # 5. start_from <= before (after it being subtracted)
+        if not start_from <= before:
+            raise ValueError('start_from (%s) > before (%s)' % (start_from, before))
+
+        # # begin rolling
+        self.rolled = True
+        # roll data for each dname
+        for dname in self.tr.keys():
+            tr, de = self.get_tr_de(dname)
+            to_roll = de.loc[start_from: before]  # this index slice include before, hence the before is subtracted 1s
+            len_tr_before_roll = len(tr)
+            len_de_before_roll = len(de)
+            len_to_move = len(to_roll)
+
+            tr = tr.append(to_roll).sort_index()
+            de = de.loc[before:]
+            self.set_tr_de(dname, tr, de)
+            len_tr_after_roll = len(tr)
+            len_de_after_roll = len(de)
+            if self.verbose:
+                print('rolling data from {sf} to {bf}, dname={dname}, # rows: {mv}'
+                      'train size: {trbf} -> {traf}'
+                      'dev size: {debf} -> {deaf}'.format(
+                    dname=dname, sf=start_from, bf=before, mv=len_to_move,
+                    trbf=len_tr_before_roll, traf=len_tr_after_roll,
+                    debf=len_de_before_roll, deaf=len_de_after_roll
+                ))
 
 
 class CompileData:
@@ -126,10 +230,10 @@ class CompileData:
                 )
 
     def __init__(self, verbose=0):
-        self.data_context = Data('context')
-        self._data_loaded = Data('Loaded')
-        self.data_y = Data('y')
-        self.data_x = Data('X')
+        self.data_context = Data('context', verbose=verbose)
+        self._data_loaded = Data('Loaded', verbose=verbose)
+        self.data_y = Data('y', verbose=verbose)
+        self.data_x = Data('X', verbose=verbose)
         self.verbose = verbose
 
     def load_data(self, dname):
@@ -278,12 +382,35 @@ if __name__ == "__main__":
     os.chdir('..')
     print('current working directory' + os.getcwd())
     compile_data = CompileData(verbose=1)
-    compile_data.set_y('crime')
+    # compile_data.set_y('crime')
     compile_data.set_y('crime/burglary')
     compile_data.set_y('crime/burglary+robbery')
-    compile_data.set_x(['crime', '911'], by_category=[True, False],
-                       category_groups={'crime': [['burglary', 'theft_larceny']]})
+    # compile_data.set_x(['crime', '911'], by_category=[True, False],
+    #                    category_groups={'crime': [['burglary', 'theft_larceny']]})
     # compile_data.set_x(['crime', '911'], by_category=[True, False])
     # compile_data.set_x(['crime', '911'], category_groups={'crime': [['burglary', 'theft_larceny']]})
     # compile_data.set_x(['crime', '911'], by_category=False,
     #                    category_groups={'crime': [['burglary', 'theft_larceny']]})
+
+    sd = datetime.datetime.strptime('2016-07-01', COL.date_format)
+    be = datetime.datetime.strptime('2016-07-10', COL.date_format)
+    print(sd, be)
+    print(compile_data.data_y.time_range)
+    try:
+        compile_data.data_y.roll_de_to_tr(sd - datetime.timedelta(days=1), be)  # failed
+        raise ValueError('This check fail')
+    except ValueError:
+        print('Raise error sd<max(tr.To) works')
+
+    try:
+        compile_data.data_y.roll_de_to_tr(sd + datetime.timedelta(days=1), be)  # failed
+        raise ValueError('This check fail')
+    except ValueError:
+        print('Raise error sd>=min(de.From) works')
+
+    try:
+        compile_data.data_y.roll_de_to_tr(sd + datetime.timedelta(days=10), be)  # failed
+        raise ValueError('This check fail')
+    except ValueError:
+        print('Raise error sd<=before works')
+    compile_data.data_y.roll_de_to_tr(sd, be)
