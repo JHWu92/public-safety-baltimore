@@ -91,6 +91,7 @@ class PathShape:
     cityline: the cityline of Baltimore
     """
     cityline = 'data/open-baltimore/raw/Baltcity_Line/baltcity_line.shp'
+    spu_dir = 'data/spu/'
 
 
 class DateTimeRelated:
