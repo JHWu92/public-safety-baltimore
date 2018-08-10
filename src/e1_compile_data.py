@@ -4,9 +4,8 @@ from itertools import chain
 import pandas as pd
 
 from src.constants import COL
-from src.utils import parse_date_str
-from src.utils import df_categories, subdf_by_categories
 from src.e0_load_data_spu import LOAD_FUNCS
+from src.utils import df_categories, subdf_by_categories, parse_date_str
 
 
 class Data:
@@ -206,15 +205,19 @@ class CompileData:
         return ('Compile Data Module:\n'
                 '\t- {x_setting}\n'
                 '\t- {y_setting}\n'
-                ''.format(x_setting=self.data_x, y_setting=self.data_y)
+                '\t- Spatial Unit: {spu_name}\n'
+                ''.format(x_setting=self.data_x, y_setting=self.data_y,
+                          spu_name=self.spu_name)
                 )
 
-    def __init__(self, verbose=0):
+    def __init__(self, spu_name=None, verbose=0):
+        self.verbose = verbose
+        self.spu_name = spu_name
+        # init Data container
         self.data_context = Data('context', verbose=verbose)
         self._data_loaded = Data('Loaded', verbose=verbose)
         self.data_y = Data('y', verbose=verbose)
         self.data_x = Data('X', verbose=verbose)
-        self.verbose = verbose
 
     def load_data(self, dname):
         """select data loading function by name"""
@@ -228,7 +231,7 @@ class CompileData:
             print('loading data ' + dname)
 
         func = LOAD_FUNCS[dname]
-        train, dev = func()
+        train, dev = func(self.spu_name, self.verbose)
         self._data_loaded.set_tr_de(dname, train, dev)
 
     def is_loaded(self, dname):
@@ -399,5 +402,5 @@ def main(cdata):
 
 
 if __name__ == "__main__":
-    compile_data = CompileData(verbose=1)
+    compile_data = CompileData(verbose=1, spu_name='grid_1000')
     main(compile_data)
