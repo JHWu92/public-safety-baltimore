@@ -5,6 +5,7 @@ import pandas as pd
 
 from src.constants import PathData, COL
 from src.data_prep import prep_911, prep_crime
+from src.utils import parse_date_str
 
 
 def df_categories(df):
@@ -145,6 +146,12 @@ class Data:
 
         # # handle start_from and before datetime
         # TODO: 1. allow start_from, before to be string
+        if isinstance(start_from, str):
+            start_from = parse_date_str(start_from)
+        if not isinstance(start_from, datetime.datetime):
+            raise TypeError('start_from cannot be parsed as datetime.datetime')
+        if isinstance(before, str):
+            before = parse_date_str(before)
         # 2. check start_from date
         trange = self.time_range
         min_defrom = trange[trange.dset == 'de'][COL.dt_from].min()
@@ -160,6 +167,8 @@ class Data:
             if not isinstance(tw, int):
                 raise ValueError('tw must be int, now tw is %s' % type(tw))
             before = start_from + datetime.timedelta(days=tw)
+        if not isinstance(before, datetime.datetime):
+            raise ValueError('before cannot be parsed as datetime.datetime')
         # 4. subtract 1 second from before, to make sure the time range to roll is [start_from, before).
         before = before - datetime.timedelta(seconds=1)
         # 5. start_from <= before (after it being subtracted)
@@ -182,10 +191,11 @@ class Data:
             len_tr_after_roll = len(tr)
             len_de_after_roll = len(de)
             if self.verbose:
-                print('rolling data from {sf} to {bf}, dname={dname}, # rows: {mv}'
-                      'train size: {trbf} -> {traf}'
+                print('Data {name} '
+                      'rolling data from {sf} to {bf}, dname={dname}, # rows: {mv} '
+                      'train size: {trbf} -> {traf} '
                       'dev size: {debf} -> {deaf}'.format(
-                    dname=dname, sf=start_from, bf=before, mv=len_to_move,
+                    name=self.name, dname=dname, sf=start_from, bf=before, mv=len_to_move,
                     trbf=len_tr_before_roll, traf=len_tr_after_roll,
                     debf=len_de_before_roll, deaf=len_de_after_roll
                 ))
@@ -376,15 +386,15 @@ class CompileData:
         return self.data_x.de
 
 
-if __name__ == "__main__":
+def main(cdata):
     import os
 
     os.chdir('..')
     print('current working directory' + os.getcwd())
-    compile_data = CompileData(verbose=1)
+
     # compile_data.set_y('crime')
-    compile_data.set_y('crime/burglary')
-    compile_data.set_y('crime/burglary+robbery')
+    cdata.set_y('crime/burglary')
+    cdata.set_y('crime/burglary+robbery')
     # compile_data.set_x(['crime', '911'], by_category=[True, False],
     #                    category_groups={'crime': [['burglary', 'theft_larceny']]})
     # compile_data.set_x(['crime', '911'], by_category=[True, False])
@@ -392,25 +402,32 @@ if __name__ == "__main__":
     # compile_data.set_x(['crime', '911'], by_category=False,
     #                    category_groups={'crime': [['burglary', 'theft_larceny']]})
 
-    sd = datetime.datetime.strptime('2016-07-01', COL.date_format)
-    be = datetime.datetime.strptime('2016-07-10', COL.date_format)
-    print(sd, be)
-    print(compile_data.data_y.time_range)
+    sd_right = '2016-07-01'
+    be = '2016-07-10'
+    sd_too_early = '2016-06-30'
+    sd_too_late = '2016-07-01 22:00:00'
+    sd_not_earlier_than_be = '2016-07-10'
+    print(cdata.data_y.time_range)
     try:
-        compile_data.data_y.roll_de_to_tr(sd - datetime.timedelta(days=1), be)  # failed
+        cdata.data_y.roll_de_to_tr(sd_too_early, be)  # failed
         raise ValueError('This check fail')
     except ValueError:
         print('Raise error sd<max(tr.To) works')
 
     try:
-        compile_data.data_y.roll_de_to_tr(sd + datetime.timedelta(days=1), be)  # failed
+        cdata.data_y.roll_de_to_tr(sd_too_late, be)  # failed
         raise ValueError('This check fail')
     except ValueError:
         print('Raise error sd>=min(de.From) works')
 
     try:
-        compile_data.data_y.roll_de_to_tr(sd + datetime.timedelta(days=10), be)  # failed
+        cdata.data_y.roll_de_to_tr(sd_not_earlier_than_be, be)  # failed
         raise ValueError('This check fail')
     except ValueError:
         print('Raise error sd<=before works')
-    compile_data.data_y.roll_de_to_tr(sd, be)
+    cdata.data_y.roll_de_to_tr(sd_right, be)
+
+
+if __name__ == "__main__":
+    compile_data = CompileData(verbose=1)
+    main(compile_data)
