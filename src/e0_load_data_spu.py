@@ -5,15 +5,27 @@ from src.data_prep import prep_911, prep_crime
 from src.constants import PathData, PathShape, COL
 
 
-def load_911():
-    train = prep_911(PathData.tr_911, by_category=False, coords_series=False, gpdf=True)
-    dev = prep_911(PathData.de_911, by_category=False, coords_series=False, gpdf=True)
+def add_spu_to_data(dname, train, dev, verbose):
+    spu_train = assigning_spu(spu_name, dname+'-train', train, verbose)
+    train = train.merge(spu_train)
+    spu_dev = assigning_spu(spu_name, dname+'-dev', dev, verbose)
+    dev = dev.merge(spu_dev)
     return train, dev
 
 
-def load_crime(spu_name=None):
+def load_911(spu_name=None, verbose=0):
+    train = prep_911(PathData.tr_911, by_category=False, coords_series=False, gpdf=True)
+    dev = prep_911(PathData.de_911, by_category=False, coords_series=False, gpdf=True)
+    if spu_name is not None:
+        train, dev = add_spu_to_data('911', train, dev, verbose)
+    return train, dev
+
+
+def load_crime(spu_name=None, verbose=0):
     train = prep_crime(PathData.tr_crime, by_category=False, coords_series=False, gpdf=True)
     dev = prep_crime(PathData.de_crime, by_category=False, coords_series=False, gpdf=True)
+    if spu_name is not None:
+        train, dev = add_spu_to_data('crime', train, dev, verbose)
     return train, dev
 
 
@@ -79,6 +91,6 @@ if __name__ == "__main__":
     # spu_name = 'bnia_nbh'
     # spu_name = 'city_nbh'
     spu_name = 'grid_100'
-    train, dev = LOAD_FUNCS[dname]()
-    a = assigning_spu(spu_name, dname + '-train', train, verbose=1)
-    b = assigning_spu(spu_name, dname + '-dev', dev, verbose=1)
+    TR, DEV = LOAD_FUNCS[dname]()
+    a = assigning_spu(spu_name, dname + '-train', TR, verbose=1)
+    b = assigning_spu(spu_name, dname + '-dev', DEV, verbose=1)
