@@ -3,40 +3,10 @@ from itertools import chain
 
 import pandas as pd
 
-from src.constants import PathData, COL
-from src.data_prep import prep_911, prep_crime
+from src.constants import COL
 from src.utils import parse_date_str
-
-
-def df_categories(df):
-    return df[COL.category].unique()
-
-
-def subdf_by_categories(df, categories):
-    """
-
-    :param df:
-    :param categories: str, or list
-    :return:
-    """
-    if isinstance(categories, str):
-        return df[df[COL.category] == categories]
-    return df[df[COL.category].isin(categories)]
-
-
-def load_911():
-    train = prep_911(PathData.tr_911, by_category=False, coords_series=False, gpdf=True)
-    dev = prep_911(PathData.de_911, by_category=False, coords_series=False, gpdf=True)
-    return train, dev
-
-
-def load_crime():
-    train = prep_crime(PathData.tr_crime, by_category=False, coords_series=False, gpdf=True)
-    dev = prep_crime(PathData.de_crime, by_category=False, coords_series=False, gpdf=True)
-    return train, dev
-
-
-LOAD_FUNCS = {'crime': load_crime, '911': load_911}
+from src.utils import df_categories, subdf_by_categories
+from src.e0_load_data_spu import LOAD_FUNCS
 
 
 class Data:
