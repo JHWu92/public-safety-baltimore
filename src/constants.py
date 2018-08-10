@@ -36,6 +36,8 @@ class COL:
     time_format = '%H:%M:%S'
     datetime = 'DateTime'
     datetime_format = date_format + ' ' + time_format
+    dt_from = 'From'
+    dt_to = 'To'
     # spatial related
     lat = 'Latitude'
     lon = 'Longitude'
