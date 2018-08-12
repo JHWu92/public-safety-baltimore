@@ -18,6 +18,14 @@ def reg_check_date_format(date_str):
     return bool(re.match('\d{4}-\d{1,2}-\d{1,2}', date_str))
 
 
+def can_be_parsed_time(time_str):
+    try:
+        datetime.datetime.strptime(time_str, '%H:%M:%S')
+        return True
+    except ValueError:
+        return False
+
+
 # ==========================
 # Datetime related
 # ==========================
