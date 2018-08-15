@@ -30,12 +30,14 @@ def can_be_parsed_time(time_str):
 # Datetime related
 # ==========================
 def parse_date_str(text):
+    if isinstance(text, datetime.datetime):
+        return text
     for fmt in (dtr.datetime_format, dtr.date_format):
         try:
             return datetime.datetime.strptime(text, fmt)
         except ValueError:
             pass
-    raise ValueError('no valid date format found')
+    raise ValueError('no valid date format found for "%s" (type=%s)' % (text, type(text)))
 
 
 # ==========================
