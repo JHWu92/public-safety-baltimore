@@ -1,15 +1,15 @@
-# coding=utf-8
+﻿# coding=utf-8
 import pandas as pd
 from manual.category_mapping import CatMapping
 import sys
+import os
 
-
+sys.path.append(os.path.abspath('../..'))
 
 
 def main():
-    sys.path.append("../../src")
-    from constants import COL, DateTimeRelated as dtc, PathData
-    from utils import reg_check_time_format, reg_check_date_format, can_be_parsed_time
+    from src.constants import COL, DateTimeRelated as dtc, PathData
+    from src.utils import reg_check_time_format, reg_check_date_format, can_be_parsed_time
     path_prefix = 'data/open-baltimore/'
 
     def pad_time_str(s):
@@ -27,7 +27,7 @@ def main():
         return s
 
     c = pd.read_csv(PathData.raw_crime.replace(path_prefix, ''))
-    print('begin cleaning, now # rows = %d'%len(c))
+    print('begin cleaning, now # rows = %d' % len(c))
 
     # remove rows with incomplete Lat/Lon
     cond = ~((c.Longitude.isnull()) | (c.Latitude.isnull()))
@@ -51,7 +51,7 @@ def main():
     c = c[c['can_be_parsed']].copy()
     print('dropped rows with wrong time format, now # rows = %d ' % (len(c)))
     # get DataTime, Date and Time
-    c[COL.datetime] = c['CrimeDate'] + ' ' +c['CrimeTime']
+    c[COL.datetime] = c['CrimeDate'] + ' ' + c['CrimeTime']
     c[COL.datetime] = pd.to_datetime(c[COL.datetime], format='%m/%d/%Y %H:%M:%S')
     c[COL.date] = c.DateTime.apply(lambda x: x.date())
     c[COL.time] = c.DateTime.apply(lambda x: x.time())
@@ -72,9 +72,12 @@ def main():
         axis=1, inplace=True)
 
     print('split train/dev/test set')
-    c[(c[COL.datetime] >= dtc.train_sd) & (c[COL.datetime] < dtc.train_ed)].to_csv(PathData.tr_crime.replace(path_prefix, ''))
-    c[(c[COL.datetime] >= dtc.dev_sd) & (c[COL.datetime] < dtc.dev_ed)].to_csv(PathData.de_crime.replace(path_prefix, ''))
-    c[(c[COL.datetime] >= dtc.test_sd) & (c[COL.datetime] < dtc.test_ed)].to_csv(PathData.te_crime.replace(path_prefix, ''))
+    c[(c[COL.datetime] >= dtc.train_sd) & (c[COL.datetime] < dtc.train_ed)].to_csv(
+        PathData.tr_crime.replace(path_prefix, ''))
+    c[(c[COL.datetime] >= dtc.dev_sd) & (c[COL.datetime] < dtc.dev_ed)].to_csv(
+        PathData.de_crime.replace(path_prefix, ''))
+    c[(c[COL.datetime] >= dtc.test_sd) & (c[COL.datetime] < dtc.test_ed)].to_csv(
+        PathData.te_crime.replace(path_prefix, ''))
 
     return
 
