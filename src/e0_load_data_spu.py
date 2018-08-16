@@ -4,7 +4,7 @@ import geopandas as gp
 import pandas as pd
 
 from src.constants import PathData, PathShape, COL
-from src.data_prep import prep_911, prep_crime
+from src.utils.data_prep import prep_911, prep_crime
 
 
 def add_spu_to_data(spu_name, dname, train, dev, verbose):

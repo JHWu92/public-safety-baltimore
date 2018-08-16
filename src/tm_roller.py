@@ -150,8 +150,8 @@ class TM_ROLLER:
 
 
 def main():
-    from src.data_prep import prep_911
-    from src.spatial_unit import baltimore_grids
+    from src.utils.data_prep import prep_911
+    from src.utils.spatial_unit import baltimore_grids
     from src import eval_metric
     from src.model.bsln_rtm import RTM
     d911_by_cat = prep_911(path='../' + C.PathDev.p911, verbose=1)

@@ -58,6 +58,7 @@ def subdf_by_categories(df, categories):
         return df[df[COL.category] == categories]
     return df[df[COL.category].isin(categories)]
 
+
 if __name__ == "__main__":
     print(reg_check_time_format('242'))
     print(reg_check_time_format('12:00:22'))

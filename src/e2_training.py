@@ -1,4 +1,4 @@
-from src.rolling_set import Rolling
+from src.utils.temporal_roll import Rolling
 
 
 class Train:
