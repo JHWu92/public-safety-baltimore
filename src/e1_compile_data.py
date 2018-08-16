@@ -1,7 +1,7 @@
 from itertools import chain
 
 from src.constants import COL
-from src.e0_load_data_spu import LOAD_FUNCS
+from src.e0_load_tr_de_spu import LOAD_FUNCS
 from src.utils import df_categories, subdf_by_categories
 from src.tr_de_container import Data
 
