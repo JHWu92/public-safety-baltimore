@@ -1,7 +1,7 @@
 from itertools import chain
 
 from src.constants import COL
-from src.e0_load_tr_de_spu import LOAD_FUNCS
+from src.e0_load_tr_de_spu import LOAD_FUNCS, get_spu
 from src.utils import df_categories, subdf_by_categories
 from src.tr_de_container import Data
 
@@ -49,6 +49,7 @@ class CompileData:
     def __init__(self, spu_name=None, verbose=0):
         self.verbose = verbose
         self.spu_name = spu_name
+        self.spu = get_spu(spu_name)
         # init Data container
         self.data_context = Data('context', verbose=verbose)
         self._data_loaded = Data('Loaded', verbose=verbose)
@@ -198,12 +199,16 @@ class CompileData:
 def main(cdata):
     import os
 
-    os.chdir('..')
+    if os.getcwd().endswith('src'):
+        os.chdir('..')
     print('current working directory' + os.getcwd())
 
+    # different y loading
     # compile_data.set_y('crime')
     cdata.set_y('crime/burglary')
     cdata.set_y('crime/burglary+robbery')
+
+    # different x loading
     # compile_data.set_x(['crime', '911'], by_category=[True, False],
     #                    category_groups={'crime': [['burglary', 'theft_larceny']]})
     # compile_data.set_x(['crime', '911'], by_category=[True, False])
@@ -211,6 +216,7 @@ def main(cdata):
     # compile_data.set_x(['crime', '911'], by_category=False,
     #                    category_groups={'crime': [['burglary', 'theft_larceny']]})
 
+    # test roll_de_to_tr
     sd_right = '2016-07-01'
     be = '2016-07-10'
     sd_too_early = '2016-06-30'
