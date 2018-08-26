@@ -2,8 +2,8 @@ from itertools import chain
 
 from src.constants import COL
 from src.e0_load_tr_de_spu import LOAD_FUNCS, get_spu
-from src.utils import df_categories, subdf_by_categories
 from src.tr_de_container import Data
+from src.utils import df_categories, subdf_by_categories
 
 
 class CompileData:
@@ -51,8 +51,8 @@ class CompileData:
         self.spu_name = spu_name
         self.spu = get_spu(spu_name)
         # init Data container
-        self.data_context = Data('context', verbose=verbose)
         self._data_loaded = Data('Loaded', verbose=verbose)
+        self.data_context = Data('context', verbose=verbose)
         self.data_y = Data('y', verbose=verbose)
         self.data_x = Data('X', verbose=verbose)
 
