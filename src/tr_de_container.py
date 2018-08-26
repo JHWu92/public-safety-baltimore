@@ -41,6 +41,12 @@ class Data:
         self.atemporal = atemporal
         self.verbose = verbose
 
+    def slice_data(self, tr_or_de, sd, ed):
+        self.assert_paired('slice_data(tr_or_de=%s' % tr_or_de)
+        data = getattr(self, tr_or_de)
+        slice = {dname: d[sd:ed] for dname, d in data.items()}
+        return slice
+
     def get_tr_de(self, dname):
         self.assert_paired('get_tr_de(dname=%s' % dname)
         if dname not in self.tr:
