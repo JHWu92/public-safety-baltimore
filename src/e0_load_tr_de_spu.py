@@ -40,6 +40,10 @@ def get_spu_path(name):
     return PathShape.spu_dir + name + '.geojson'
 
 
+def get_spu(name):
+    return gp.read_file(get_spu_path(name))
+
+
 def get_assignment_path(dname):
     return PathShape.spu_dir + 'assignment_%s.csv' % dname
 
@@ -66,7 +70,7 @@ def assigning_spu(spu_name, dname, data, verbose=0):
     else:
         print(
             'spatial unit assignment for data %s in spu %s does not exist, spatial intersecting...' % (dname, spu_name))
-        spu = gp.read_file(get_spu_path(spu_name))
+        spu = get_spu(spu_name)
         joined = gp.sjoin(spu, data)[[COL.ori_index]]
         joined = joined.reset_index().rename(columns={'index': spu_name}).set_index(COL.ori_index)
         assignment = assignment.join(joined, how='left')
@@ -79,6 +83,7 @@ def assigning_spu(spu_name, dname, data, verbose=0):
         print('****WARNING**** Some data get multiple assignments')
     if spu_assign[spu_name].isnull().sum() > 0:
         print('****WARNING**** Some data get 0 assignment')
+    spu_assign.rename(columns={spu_name: COL.spu}, inplace=True)
 
     return spu_assign
 
