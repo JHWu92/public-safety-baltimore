@@ -44,6 +44,7 @@ class COL:
     coords = 'Coords'
     center = 'Cen_coords'
     area = 'Area'
+    spu = 'SPU'
 
 
 class PathData:
