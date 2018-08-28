@@ -4,6 +4,27 @@ from src.constants import COL
 from src.e0_load_tr_de_spu import LOAD_FUNCS, get_spu
 from src.tr_de_container import Data
 from src.utils import df_categories, subdf_by_categories
+from src.xy_gen import event_cnt
+
+
+def get_x(data, x_setting, index_order=None):
+    if x_setting == 'event_cnt':
+        x = event_cnt(data)
+        if index_order is not None:
+            x = x.loc[index_order].fillna(0)
+        return x
+    else:
+        raise NotImplementedError('No such x setting:' + x_setting)
+
+
+def get_y(data, y_setting, index_order=None):
+    if y_setting == 'event_cnt':
+        y = event_cnt(data)
+        if index_order is not None:
+            y = y.loc[index_order].fillna(0)
+        return y
+    else:
+        raise NotImplementedError('No such y setting:' + y_setting)
 
 
 class CompileData:
@@ -195,6 +216,18 @@ class CompileData:
     def x_dev(self):
         return self.data_x.de
 
+    def gen_x_y_for_model(self, x_setting, y_setting, dates):
+        past_sd, past_ed, pred_sd, pred_ed = dates
+        # use feature in the past predict Y in the future
+        # F(x_past) = y_pred
+        data_x_past = self.data_x.slice_data('tr', past_sd, past_ed)
+        data_y_pred = self.data_y.slice_data('tr', pred_sd, pred_ed)
+        x = get_x(data_x_past, x_setting=x_setting, index_order=self.spu.index)
+        y = get_y(data_y_pred, y_setting=y_setting, index_order=self.spu.index)
+        if y.shape[1] > 1:
+            raise NotImplementedError('Multiple Y not implemented')
+        # TODO: add context to x
+        return x, y
 
 def main(cdata):
     import os

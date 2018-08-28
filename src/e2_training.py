@@ -1,26 +1,7 @@
 from src.e1_compile_data import CompileData
 from src.utils.temporal_roll import Rolling
-from src.xy_gen import event_cnt
 
 
-def get_x(data, x_setting, index_order=None):
-    if x_setting == 'event_cnt':
-        x = event_cnt(data)
-        if index_order is not None:
-            x = x.loc[index_order].fillna(0)
-        return x
-    else:
-        raise NotImplementedError('No such x setting:' + x_setting)
-
-
-def get_y(data, y_setting, index_order=None):
-    if y_setting == 'event_cnt':
-        y = event_cnt(data)
-        if index_order is not None:
-            y = y.loc[index_order].fillna(0)
-        return y
-    else:
-        raise NotImplementedError('No such y setting:' + y_setting)
 
 
 class Train:
@@ -76,15 +57,8 @@ class Train:
             raise ValueError('Set data first')
 
         if not self.stack_roll:
-            past_sd, past_ed, pred_sd, pred_ed = self.roller.most_recent_period()
-            # use feature in the past predict Y in the future
-            # F(x_past) = y_pred
-            data_x_past = self.cdata.data_x.slice_data('tr', past_sd, past_ed)
-            data_y_pred = self.cdata.data_y.slice_data('tr', pred_sd, pred_ed)
-            x = get_x(data_x_past, x_setting=self.x_setting, index_order=self.cdata.spu.index)
-            y = get_y(data_y_pred, y_setting=self.y_setting, index_order=self.cdata.spu.index)
-            if y.shape[1] > 1:
-                raise NotImplementedError('Multiple Y not implemented')
+            dates = self.roller.most_recent_period()
+            x, y = self.cdata.gen_x_y_for_model(self.x_setting, self.y_setting, dates)
             print(x.shape, y.shape)
             self.model.fit(x.values, y.values.ravel())
         else:
