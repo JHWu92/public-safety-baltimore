@@ -1,7 +1,4 @@
-from src.e1_compile_data import CompileData
 from src.utils.temporal_roll import Rolling
-
-
 
 
 class Train:
@@ -70,6 +67,7 @@ if __name__ == "__main__":
     from sklearn.ensemble import RandomForestRegressor
     from sklearn.model_selection import RandomizedSearchCV
     from scipy.stats import randint as sp_randint
+    from src.e1_compile_data import CompileData
 
     import os
 
