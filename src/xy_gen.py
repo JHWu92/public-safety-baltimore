@@ -42,5 +42,4 @@ def event_cnt(data):
     cnts = pd.concat(cnts, axis=1)
     if isinstance(cnts, pd.Series):
         cnts = cnts.to_frame()
-    cnts.fillna(0, inplace=True)
     return cnts
