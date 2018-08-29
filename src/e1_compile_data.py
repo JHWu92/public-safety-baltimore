@@ -3,7 +3,7 @@ from itertools import chain
 from src.constants import COL
 from src.e0_load_tr_de_spu import LOAD_FUNCS, get_spu
 from src.tr_de_container import Data
-from src.utils import df_categories, subdf_by_categories
+from src.utils import get_df_categories, subdf_by_categories
 from src.xy_gen import event_cnt
 
 
@@ -124,8 +124,8 @@ class CompileData:
         de = self._data_loaded.de[dname]
 
         if categories:
-            tr_cat = df_categories(tr)
-            de_cat = df_categories(de)
+            tr_cat = get_df_categories(tr)
+            de_cat = get_df_categories(de)
             for c in categories:
                 assert c in tr_cat, 'category: %s is not in Train set (%s)' % (c, tr_cat)
                 assert c in de_cat, 'category: %s is not in Train set (%s)' % (c, de_cat)
@@ -179,8 +179,8 @@ class CompileData:
 
             # each category not in groups is treated as a set of independent point
             if byc:
-                categories = set(df_categories(self._data_loaded.tr[dname])) | set(
-                    df_categories(self._data_loaded.de[dname]))
+                categories = set(get_df_categories(self._data_loaded.tr[dname])) | set(
+                    get_df_categories(self._data_loaded.de[dname]))
 
                 if self.verbose:
                     print('set_x: adding individual category of data ' + dname)

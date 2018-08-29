@@ -43,7 +43,7 @@ def parse_date_str(text):
 # ==========================
 # DataFrame related
 # ==========================
-def df_categories(df):
+def get_df_categories(df):
     return df[COL.category].unique()
 
 

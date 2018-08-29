@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 
 from src.constants import COL
-from src.utils import df_categories, parse_date_str
+from src.utils import get_df_categories, parse_date_str
 
 
 class Data:
@@ -73,8 +73,8 @@ class Data:
         assert tr_or_de in ['tr', 'de']
         data = self.tr if tr_or_de == 'tr' else self.de
         if dname:
-            return df_categories(data[dname])
-        return {name: df_categories(data[name]) for name in data.keys()}
+            return get_df_categories(data[dname])
+        return {name: get_df_categories(data[name]) for name in data.keys()}
 
     @property
     def time_range(self):
