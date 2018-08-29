@@ -1,25 +1,31 @@
+from itertools import chain
+
+from src.constants import COL
 from src.e0_load_tr_de_spu import LOAD_FUNCS, get_spu
+from src.utils import get_df_categories, subdf_by_categories
+
 
 class NamedData:
     def __str__(self):
-        return "Data {name}, dname of {keys}".format(name=self.name, keys=list(self.data.keys()))
+        return "Data {name}, dname of {keys}".format(name=self.name, keys=list(self.named_data.keys()))
 
     def __init__(self, name, atemporal=False, verbose=0):
-        self.data = {}
-        self.name=name
+        self.named_data = {}
+        self.name = name
         self.atemporal = atemporal
         self.verbose = verbose
 
     def slice_data(self, sd, ed, dnames=None):
         if dnames:
             if isinstance(dnames, str):
-                data = {dnames: self.data[dnames]}
+                data = {dnames: self.named_data[dnames]}
             else:
-                data = {dname: self.data[dname] for dname in dnames}
+                data = {dname: self.named_data[dname] for dname in dnames}
         else:
-            data = self.data
+            data = self.named_data
         subset = {dname: d[sd:ed] for dname, d in data.items()}
         return subset
+
 
 class CompileData:
 
@@ -45,14 +51,15 @@ class CompileData:
         """select data loading function by name"""
 
         if dname not in LOAD_FUNCS:
-            raise ValueError('Name=%s cannot be loaded, it hasnt been implemented. Supported data: %s' % ( dname, ', '.join(LOAD_FUNCS.keys())) )
+            raise ValueError('Name=%s cannot be loaded, it hasnt been implemented. Supported data: %s' % (
+                dname, ', '.join(LOAD_FUNCS.keys())))
 
         if self.verbose:
             print('loading data ' + dname)
 
         func = LOAD_FUNCS[dname]
-        train, dev = func(self.spu_name, self.verbose)
-        self._data_loaded.set_tr_de(dname, train, dev)
+        data = func(self.spu_name, self.verbose, merge_tr_de=True)
+        self._data_loaded.named_data[dname] = data
 
     def is_loaded(self, dname):
         """assert data sets are loaded in both train and dev set; if the data is not loaded, load the data
@@ -63,7 +70,7 @@ class CompileData:
             the name of data to be loaded
         """
 
-        if dname not in self._data_loaded.tr:
+        if dname not in self._data_loaded.named_data:
             self.load_data(dname)
 
     def set_y(self, dname):
@@ -82,19 +89,15 @@ class CompileData:
             categories = categories.split('+')
 
         self.is_loaded(dname)
-        tr = self._data_loaded.tr[dname]
-        de = self._data_loaded.de[dname]
+        data = self._data_loaded.named_data[dname]
 
         if categories:
-            tr_cat = get_df_categories(tr)
-            de_cat = get_df_categories(de)
+            data_cat = get_df_categories(data)
             for c in categories:
-                assert c in tr_cat, 'category: %s is not in Train set (%s)' % (c, tr_cat)
-                assert c in de_cat, 'category: %s is not in Train set (%s)' % (c, de_cat)
-            tr = tr[tr[COL.category].isin(categories)]
-            de = de[de[COL.category].isin(categories)]
+                assert c in data_cat, 'category: %s is not in dataset (%s)' % (c, data_cat)
+            data = data[data[COL.category].isin(categories)]
 
-        self.data_y.set_tr_de(dname_cat, tr, de)
+        self.data_y.named_data[dname_cat] = data
         if self.verbose >= 1:
             print('set data for y, dname/categories=%s' % dname_cat)
 
@@ -135,14 +138,11 @@ class CompileData:
                     print('set_x: adding groups for data ' + dname)
                 for g in groups:
                     dname_cat = '%s/%s' % (dname, '+'.join(g))
-                    self.data_x.set_tr_de(dname_cat,
-                                          subdf_by_categories(self._data_loaded.tr[dname], g),
-                                          subdf_by_categories(self._data_loaded.de[dname], g))
+                    self.data_x.named_data[dname_cat] = subdf_by_categories(self._data_loaded.named_data[dname], g)
 
             # each category not in groups is treated as a set of independent point
             if byc:
-                categories = set(get_df_categories(self._data_loaded.tr[dname])) | set(
-                    get_df_categories(self._data_loaded.de[dname]))
+                categories = set(get_df_categories(self._data_loaded.named_data[dname]))
 
                 if self.verbose:
                     print('set_x: adding individual category of data ' + dname)
@@ -152,15 +152,15 @@ class CompileData:
 
                 for c in categories - cat_in_g:
                     dname_cat = '%s/%s' % (dname, c)
-                    self.data_x.set_tr_de(dname_cat,
-                                          subdf_by_categories(self._data_loaded.tr[dname], c),
-                                          subdf_by_categories(self._data_loaded.de[dname], c))
+                    self.data_x.named_data[dname_cat] = subdf_by_categories(self._data_loaded.named_data[dname], c)
 
             # treated as one set of homogeneous points
             if not has_group and not byc:
                 if self.verbose:
                     print('set_x: adding whole set of data ' + dname)
-                self.data_x.set_tr_de(dname, self._data_loaded.tr[dname], self._data_loaded.de[dname])
+                self.data_x.named_data[dname] = self._data_loaded.named_data[dname]
+
+
 def train_model(compile_data, roller, model, x_setting, y_setting, stack_roll=False, model_name=None):
     if model_name is None:
         model_name = type(model).__name__
@@ -193,6 +193,7 @@ def train_model(compile_data, roller, model, x_setting, y_setting, stack_roll=Fa
 
 def eval(compile_data, train_roller, eval_roller, model):
     raise NotImplementedError()
+
 
 if __name__ == "__main__":
     import os

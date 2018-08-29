@@ -17,19 +17,24 @@ def add_spu_to_data(spu_name, dname, train, dev, verbose):
     return train, dev
 
 
-def load_911(spu_name=None, verbose=0):
+def load_911(spu_name=None, verbose=0, merge_tr_de=False):
     train = prep_911(PathData.tr_911, by_category=False, coords_series=False, gpdf=True)
     dev = prep_911(PathData.de_911, by_category=False, coords_series=False, gpdf=True)
     if spu_name is not None:
         train, dev = add_spu_to_data(spu_name, '911', train, dev, verbose)
+    if merge_tr_de:
+        return train.append(dev)
     return train, dev
 
 
-def load_crime(spu_name=None, verbose=0):
+def load_crime(spu_name=None, verbose=0, merge_tr_de=False):
     train = prep_crime(PathData.tr_crime, by_category=False, coords_series=False, gpdf=True)
     dev = prep_crime(PathData.de_crime, by_category=False, coords_series=False, gpdf=True)
     if spu_name is not None:
         train, dev = add_spu_to_data(spu_name, 'crime', train, dev, verbose)
+    if merge_tr_de:
+        data = train.append(dev)
+        return data
     return train, dev
 
 
@@ -103,3 +108,5 @@ if __name__ == "__main__":
     TR, DEV = LOAD_FUNCS[DNAME]()
     a = assigning_spu(SPU_NAME, DNAME + '-train', TR, verbose=1)
     b = assigning_spu(SPU_NAME, DNAME + '-dev', DEV, verbose=1)
+    C = load_crime()
+    print(C)
