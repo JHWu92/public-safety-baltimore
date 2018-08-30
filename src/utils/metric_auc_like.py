@@ -1,15 +1,33 @@
 import pandas as pd
 
 from src import constants as C
-from sklearn.metrics import mean_absolute_error, r2_score
 
 
-def mse_wrap(y_true, y_pred, spu=None):
-    return mean_absolute_error(y_true, y_pred)
+def spu2spatial_unit_attr(y_true, y_pred, spu):
+    spatial_unit_attr = spu.copy()
+    spatial_unit_attr[C.COL.num_events] = y_true
+    spatial_unit_attr[C.COL.risk] = y_pred
+    return spatial_unit_attr
 
 
-def r2_wrap(y_true, y_pred, spu=None):
-    return r2_score(y_true, y_pred)
+def hit_rate_auc_wrap(y_true, y_pred, spu):
+    spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
+    return hit_rate_auc(spatial_unit_attr)
+
+
+def search_efficient_rate_auc_wrap(y_true, y_pred, spu):
+    spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
+    return search_efficient_rate_auc(spatial_unit_attr)
+
+
+def prediction_accuracy_index_auc_wrap(y_true, y_pred, spu):
+    spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
+    return prediction_accuracy_index_auc_wrap(spatial_unit_attr)
+
+
+def area_to_perimeter_ratio_auc(y_true, y_pred, spu):
+    spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
+    return area_to_perimeter_ratio_auc(spatial_unit_attr)
 
 
 # TODO: metrics that compute on "hotspots" instead of top N% most risky grids

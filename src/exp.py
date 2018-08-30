@@ -237,12 +237,8 @@ def eval(compile_data, train_roller, eval_roller, model, evaluators, refit=False
 
 if __name__ == '__main__':
     import os
-    from sklearn.ensemble import RandomForestRegressor
-    from sklearn.linear_model import LinearRegression
     from sklearn.svm import SVR
-    from sklearn.model_selection import RandomizedSearchCV
-    from scipy.stats import randint as sp_randint
-    from src.eval_metric import mse_wrap, r2_wrap
+    from src.utils.metric_single_num import mse_wrap, r2_wrap
 
     if os.getcwd().endswith('src'):
         os.chdir('..')
@@ -274,4 +270,5 @@ if __name__ == '__main__':
 
     E_R = Rolling(rsd='2016-07-01', red='2017-07-01', rstep=7, tw_past=60, tw_pred=7)
 
-    EVAL_RES = eval(D, T_R, E_R, M, [mse_wrap, r2_wrap], True)
+    EVTORS = [mse_wrap, r2_wrap]
+    EVAL_RES = eval(D, T_R, E_R, M, EVTORS, refit=False)
