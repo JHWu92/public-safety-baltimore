@@ -108,7 +108,7 @@ class TM_ROLLER:
             yield {
                 'train_x_events': train_x_events,  # 'test_x_events': test_x_events,
                 'train_y_events': train_y_events, 'test_y_events': test_y_events,
-                'tw_sd'         : tw_sd, 'tw_ed': tw_ed, 'train_ed': train_ed
+                'tw_sd': tw_sd, 'tw_ed': tw_ed, 'train_ed': train_ed
             }
             tw_sd += datetime.timedelta(days=self.roll_step)
             num_loops += 1
@@ -152,7 +152,7 @@ class TM_ROLLER:
 def main():
     from src.utils.data_prep import prep_911
     from src.utils.spatial_unit import baltimore_grids
-    from src.utils import metric_auc_like
+    from src.utils import metric_roc_like
     from src.model.bsln_rtm import RTM
     d911_by_cat = prep_911(path='../' + C.PathDev.p911, verbose=1)
     d911_by_cat = {key: d911_by_cat[key] for key in ['burglary', 'abuse']}
@@ -171,10 +171,10 @@ def main():
     tmroller = TM_ROLLER(method, d911_by_cat, d911_y, vsd, ved, roll_step=vstep, eval_tw=vtw, verbose=2)
 
     metrics = [
-        metric_auc_like.hit_rate_auc, metric_auc_like.search_efficient_rate_auc,
-        metric_auc_like.prediction_accuracy_index_auc, metric_auc_like.area_to_perimeter_ratio_auc,
-        metric_auc_like.hit_rate_bin, metric_auc_like.search_efficient_rate_bin,
-        metric_auc_like.prediction_accuracy_index_bin, metric_auc_like.area_to_perimeter_ratio_bin,
+        metric_roc_like.hit_rate_upct, metric_roc_like.search_efficient_rate_upct,
+        metric_roc_like.prediction_accuracy_index_upct, metric_roc_like.area_to_perimeter_ratio_upct,
+        metric_roc_like.hit_rate_rbin, metric_roc_like.search_efficient_rate_rbin,
+        metric_roc_like.prediction_accuracy_index_rbin, metric_roc_like.area_to_perimeter_ratio_rbin,
     ]
     res = tmroller.eval(metrics, grids)
     for m in metrics:

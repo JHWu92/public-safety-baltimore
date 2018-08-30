@@ -3,6 +3,9 @@ import pandas as pd
 from src import constants as C
 
 
+# upct: unit percentage
+# rbin: risk bin
+
 def spu2spatial_unit_attr(y_true, y_pred, spu):
     spatial_unit_attr = spu.copy()
     spatial_unit_attr[C.COL.num_events] = y_true
@@ -10,67 +13,67 @@ def spu2spatial_unit_attr(y_true, y_pred, spu):
     return spatial_unit_attr
 
 
-def hit_rate_auc_wrap(y_true, y_pred, spu):
+def hit_rate_upct_wrap(y_true, y_pred, spu):
     spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
-    return hit_rate_auc(spatial_unit_attr)
+    return hit_rate_upct(spatial_unit_attr)
 
 
-def search_efficient_rate_auc_wrap(y_true, y_pred, spu):
+def search_efficient_rate_upct_wrap(y_true, y_pred, spu):
     spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
-    return search_efficient_rate_auc(spatial_unit_attr)
+    return search_efficient_rate_upct(spatial_unit_attr)
 
 
-def prediction_accuracy_index_auc_wrap(y_true, y_pred, spu):
+def prediction_accuracy_index_upct_wrap(y_true, y_pred, spu):
     spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
-    return prediction_accuracy_index_auc_wrap(spatial_unit_attr)
+    return prediction_accuracy_index_upct_wrap(spatial_unit_attr)
 
 
-def area_to_perimeter_ratio_auc(y_true, y_pred, spu):
+def area_to_perimeter_ratio_upct(y_true, y_pred, spu):
     spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
-    return area_to_perimeter_ratio_auc(spatial_unit_attr)
+    return area_to_perimeter_ratio_upct(spatial_unit_attr)
 
 
 # TODO: metrics that compute on "hotspots" instead of top N% most risky grids
 
 
-def auc_idx(len_obj, num_obs):
+def upct_idx(len_obj, num_obs):
     """
-    helper for creating AUC-like index
+    helper for creating upct-like index
     :param len_obj: number of objects
     :param num_obs: number of observation points for plotting
     :return:
     """
     # print(len_obj, num_obs)
-    idx_for_auc = [int(len_obj * (i + 1) / num_obs) for i in range(num_obs - 1)] + [len_obj - 1]
+    idx_for_upct = [int(len_obj * (i + 1) / num_obs) for i in range(num_obs - 1)] + [len_obj - 1]
     readable_index = ['%.0f%%' % ((i + 1) / num_obs * 100) for i in range(num_obs)]
-    return idx_for_auc, readable_index
+    return idx_for_upct, readable_index
 
 
-def bin_idx(risk, num):
+def rbin_idx(risk, num):
     mi, ma = risk.min(), risk.max()
     iloc_idx, readable_idx = [], []
     for i in range(num):
         thres = mi + (ma - mi) * (1 - (i + 1) / num)
         iloc_idx.append((risk >= thres).sum() - 1)
-        readable_idx.append('bin>=%d' % (i + 1))
+        readable_idx.append('rbin>=%d' % (i + 1))
     # print(iloc_idx, readable_idx)
     return iloc_idx, readable_idx
 
 
-def get_idx(spatial_unit_attr, num, auc_or_bin='auc'):
-    if auc_or_bin == 'auc':
+def get_idx(spatial_unit_attr, num, upct_or_rbin='upct'):
+    if upct_or_rbin == 'upct':
         len_obj = len(spatial_unit_attr)
-        return auc_idx(len_obj, num)
-    elif auc_or_bin == 'bin':
+        return upct_idx(len_obj, num)
+    elif upct_or_rbin == 'rbin':
         risk = spatial_unit_attr[C.COL.risk]
-        return bin_idx(risk, num)
+        return rbin_idx(risk, num)
     else:
-        raise ValueError('auc_or_bin should be one of: auc, bin')
+        raise ValueError('upct_or_rbin should be one of: upct, rbin')
 
 
 def hit_to_pai(spatial_unit_attr, event_normalized=False,
                area_normalized=False, event_by_area=False,
-               auc_or_bin='auc'):
+               upct_or_rbin='upct'):
     """Aggregate hit rate, search efficient rate and PAI
     into a parameter-controlled process
 
@@ -83,12 +86,12 @@ def hit_to_pai(spatial_unit_attr, event_normalized=False,
     :param event_by_area: if no: hit rate; yes, search rate or PAI
     """
 
-    # auc index
+    # upct index
     # num_grids = len(spatial_unit_attr)
-    # idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
-    # iloc_idx, readable_idx = auc_idx(num_grids, 10)
-    num = 5 if auc_or_bin == 'bin' else 10
-    iloc_idx, readable_idx = get_idx(spatial_unit_attr, num, auc_or_bin)
+    # idx_for_upct = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
+    # iloc_idx, readable_idx = upct_idx(num_grids, 10)
+    num = 5 if upct_or_rbin == 'rbin' else 10
+    iloc_idx, readable_idx = get_idx(spatial_unit_attr, num, upct_or_rbin)
 
     tmp = spatial_unit_attr.sort_values(C.COL.risk, ascending=False)
     tmp[C.COL.area] /= 1e6
@@ -106,11 +109,11 @@ def hit_to_pai(spatial_unit_attr, event_normalized=False,
     return res
 
 
-def hit_rate_auc(spatial_unit_attr):
-    return hit_to_pai(spatial_unit_attr, event_normalized=True, event_by_area=False, auc_or_bin='auc')
+def hit_rate_upct(spatial_unit_attr):
+    return hit_to_pai(spatial_unit_attr, event_normalized=True, event_by_area=False, upct_or_rbin='upct')
 
 
-def search_efficient_rate_auc(spatial_unit_attr):
+def search_efficient_rate_upct(spatial_unit_attr):
     """Proposed by Bower et al 2004 (Bowers2004-gn):
     the number of crimes successfully predicted per kilometre-squared.
     Using a standardized index allows different procedures
@@ -125,10 +128,10 @@ def search_efficient_rate_auc(spatial_unit_attr):
     :return:
     """
     return hit_to_pai(spatial_unit_attr, event_normalized=False, area_normalized=False, event_by_area=True,
-                      auc_or_bin='auc')
+                      upct_or_rbin='upct')
 
 
-def prediction_accuracy_index_auc(spatial_unit_attr):
+def prediction_accuracy_index_upct(spatial_unit_attr):
     """PAI, Proposed by \cite{Chainey2008-ys}.
 
     the greater the number of future crime events in
@@ -140,18 +143,18 @@ def prediction_accuracy_index_auc(spatial_unit_attr):
      and to any analysis technique that aims to predict spatial patterns of crime
     """
     return hit_to_pai(spatial_unit_attr, event_normalized=True, area_normalized=True, event_by_area=True,
-                      auc_or_bin='auc')
+                      upct_or_rbin='upct')
 
 
-def area_to_perimeter_ratio_auc(spatial_unit_attr, auc_or_bin='auc'):
+def area_to_perimeter_ratio_upct(spatial_unit_attr, upct_or_rbin='upct'):
     """Proposed by bower-2004"""
     from shapely.ops import cascaded_union
-    # auc index
+    # upct index
     # num_grids = len(spatial_unit_attr)
-    # idx_for_auc = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
-    # idx_for_auc, readable_idx = auc_idx(num_grids, 10)
-    num = 5 if auc_or_bin == 'bin' else 10
-    iloc_idx, readable_idx = get_idx(spatial_unit_attr, num, auc_or_bin)
+    # idx_for_upct = [int(num_grids * (i + 1) / 10) for i in range(9)] + [num_grids - 1]
+    # idx_for_upct, readable_idx = upct_idx(num_grids, 10)
+    num = 5 if upct_or_rbin == 'rbin' else 10
+    iloc_idx, readable_idx = get_idx(spatial_unit_attr, num, upct_or_rbin)
 
     tmp = spatial_unit_attr.sort_values(C.COL.risk, ascending=False)
     tmp['cum_area'] = tmp[C.COL.area].cumsum()
@@ -168,22 +171,22 @@ def area_to_perimeter_ratio_auc(spatial_unit_attr, auc_or_bin='auc'):
     return pd.Series(res, index=readable_idx)
 
 
-def hit_rate_bin(spatial_unit_attr):
-    return hit_to_pai(spatial_unit_attr, event_normalized=True, event_by_area=False, auc_or_bin='bin')
+def hit_rate_rbin(spatial_unit_attr):
+    return hit_to_pai(spatial_unit_attr, event_normalized=True, event_by_area=False, upct_or_rbin='rbin')
 
 
-def search_efficient_rate_bin(spatial_unit_attr):
+def search_efficient_rate_rbin(spatial_unit_attr):
     return hit_to_pai(spatial_unit_attr, event_normalized=False, area_normalized=False, event_by_area=True,
-                      auc_or_bin='bin')
+                      upct_or_rbin='rbin')
 
 
-def prediction_accuracy_index_bin(spatial_unit_attr):
+def prediction_accuracy_index_rbin(spatial_unit_attr):
     return hit_to_pai(spatial_unit_attr, event_normalized=True, area_normalized=True, event_by_area=True,
-                      auc_or_bin='bin')
+                      upct_or_rbin='rbin')
 
 
-def area_to_perimeter_ratio_bin(spatial_unit_attr):
-    return area_to_perimeter_ratio_auc(spatial_unit_attr, 'bin')
+def area_to_perimeter_ratio_rbin(spatial_unit_attr):
+    return area_to_perimeter_ratio_upct(spatial_unit_attr, 'rbin')
 
 
 def main():
@@ -202,8 +205,8 @@ def main():
     # print(hit_rate(df))
     # print(search_efficient_rate(df))
     # print(prediction_accuracy_index(df))
-    print(hit_rate_auc(df), hit_rate_auc.__name__)
-    print(hit_rate_bin(df), hit_rate_bin.__name__)
+    print(hit_rate_upct(df), hit_rate_upct.__name__)
+    print(hit_rate_rbin(df), hit_rate_rbin.__name__)
     return
 
 
