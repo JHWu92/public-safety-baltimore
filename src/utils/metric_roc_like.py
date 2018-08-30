@@ -28,7 +28,7 @@ def prediction_accuracy_index_upct_wrap(y_true, y_pred, spu):
     return prediction_accuracy_index_upct_wrap(spatial_unit_attr)
 
 
-def area_to_perimeter_ratio_upct(y_true, y_pred, spu):
+def area_to_perimeter_ratio_upct_wrap(y_true, y_pred, spu):
     spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
     return area_to_perimeter_ratio_upct(spatial_unit_attr)
 
@@ -207,8 +207,8 @@ def main():
     # print(prediction_accuracy_index(df))
     print(hit_rate_upct(df), hit_rate_upct.__name__)
     print(hit_rate_rbin(df), hit_rate_rbin.__name__)
-    return
+    return hit_rate_upct(df)
 
 
 if __name__ == '__main__':
-    main()
+    roc = main()
