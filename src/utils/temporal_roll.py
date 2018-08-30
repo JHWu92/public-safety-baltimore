@@ -4,6 +4,9 @@ from src.utils import parse_date_str
 
 
 class Rolling:
+    def __repr__(self):
+        return self.__str__()
+
     def __str__(self):
         s = ''
         for attr in ['rstep', 'rsd', 'red', 'rnd', 'rback', 'num_step', 'tw_past', 'tw_pred']:
