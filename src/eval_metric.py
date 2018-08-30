@@ -1,6 +1,15 @@
 import pandas as pd
 
 from src import constants as C
+from sklearn.metrics import mean_absolute_error, r2_score
+
+
+def mse_wrap(y_true, y_pred, spu=None):
+    return mean_absolute_error(y_true, y_pred)
+
+
+def r2_wrap(y_true, y_pred, spu=None):
+    return r2_score(y_true, y_pred)
 
 
 # TODO: metrics that compute on "hotspots" instead of top N% most risky grids
@@ -24,8 +33,8 @@ def bin_idx(risk, num):
     iloc_idx, readable_idx = [], []
     for i in range(num):
         thres = mi + (ma - mi) * (1 - (i + 1) / num)
-        iloc_idx.append((risk >= thres).sum()-1)
-        readable_idx.append('bin>=%d' % (i+1))
+        iloc_idx.append((risk >= thres).sum() - 1)
+        readable_idx.append('bin>=%d' % (i + 1))
     # print(iloc_idx, readable_idx)
     return iloc_idx, readable_idx
 

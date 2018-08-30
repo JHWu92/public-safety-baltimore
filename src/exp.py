@@ -1,5 +1,6 @@
 from itertools import chain
-
+import pandas as pd
+import copy
 from src.constants import COL
 from src.e0_load_tr_de_spu import LOAD_FUNCS, get_spu
 from src.utils import get_df_categories, subdf_by_categories
@@ -212,20 +213,26 @@ def data_for_fit(compile_data, x_setting, y_setting, dates=None, stack_roll=Fals
 
 def eval(compile_data, train_roller, eval_roller, model, evaluators, refit=False):
     eval_res = []
+    tmp_train_roller = copy.copy(train_roller)
     for i, dates in enumerate(eval_roller.roll()):
         past_sd, past_ed, pred_sd, pred_ed = dates
-        res = {'past_sd': past_sd, 'past_ed': past_ed, 'pred_sd': pred_sd, 'pred_ed': pred_ed}
+        res = {'period': 'X: %s~%s -> Y: %s~%s' % (past_sd, past_ed, pred_sd, pred_ed)}
         if refit and i != 0:
-            train_roller.red = past_sd
-            X, Y = data_for_fit(compile_data, roller=train_roller, x_setting='event_cnt', y_setting='event_cnt',
+            tmp_train_roller.red = past_sd
+            X, Y = data_for_fit(compile_data, roller=tmp_train_roller, x_setting='event_cnt', y_setting='event_cnt',
                                 stack_roll=False, verbose=V)
             model.fit(X, Y)
         eval_x, eval_y = data_for_fit(compile_data, x_setting='event_cnt', y_setting='event_cnt', dates=dates,
                                       verbose=V)
         pred_y = model.predict(eval_x)
-        print(evaluators(eval_y, pred_y))
+        for e in evaluators:
+            res[e.__name__] = e(eval_y, pred_y, compile_data.spu)
+
+        eval_res.append(res)
         if i > 3:
             break
+
+    return pd.DataFrame(eval_res)
 
 
 if __name__ == '__main__':
@@ -235,7 +242,7 @@ if __name__ == '__main__':
     from sklearn.svm import SVR
     from sklearn.model_selection import RandomizedSearchCV
     from scipy.stats import randint as sp_randint
-    from sklearn.metrics import mean_squared_error
+    from src.eval_metric import mse_wrap, r2_wrap
 
     if os.getcwd().endswith('src'):
         os.chdir('..')
@@ -263,8 +270,8 @@ if __name__ == '__main__':
                         verbose=V)
 
     M.fit(X, Y)
-    print('training score: ', mean_squared_error(Y, M.predict(X)))
+    print('training score: ', mse_wrap(Y, M.predict(X)))
 
     E_R = Rolling(rsd='2016-07-01', red='2017-07-01', rstep=7, tw_past=60, tw_pred=7)
 
-    eval(D, T_R, E_R, M, mean_squared_error, True)
+    EVAL_RES = eval(D, T_R, E_R, M, [mse_wrap, r2_wrap], True)
