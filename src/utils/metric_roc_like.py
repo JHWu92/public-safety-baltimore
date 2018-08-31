@@ -25,7 +25,7 @@ def search_efficient_rate_upct_wrap(y_true, y_pred, spu):
 
 def prediction_accuracy_index_upct_wrap(y_true, y_pred, spu):
     spatial_unit_attr = spu2spatial_unit_attr(y_true, y_pred, spu)
-    return prediction_accuracy_index_upct_wrap(spatial_unit_attr)
+    return prediction_accuracy_index_upct(spatial_unit_attr)
 
 
 def area_to_perimeter_ratio_upct_wrap(y_true, y_pred, spu):
@@ -203,8 +203,9 @@ def main():
     df = pd.DataFrame(d)
     df.columns = [C.COL.risk, C.COL.num_events, C.COL.area, 'geometry']
     # print(hit_rate(df))
-    # print(search_efficient_rate(df))
-    # print(prediction_accuracy_index(df))
+    print(search_efficient_rate_upct(df), search_efficient_rate_upct.__name__)
+    print(prediction_accuracy_index_upct(df), prediction_accuracy_index_upct.__name__)
+    print(area_to_perimeter_ratio_upct(df), area_to_perimeter_ratio_upct.__name__)
     print(hit_rate_upct(df), hit_rate_upct.__name__)
     print(hit_rate_rbin(df), hit_rate_rbin.__name__)
     return hit_rate_upct(df)
