@@ -1,6 +1,8 @@
-from itertools import chain
-import pandas as pd
 import copy
+from itertools import chain
+
+import pandas as pd
+
 from src.constants import COL
 from src.e0_load_tr_de_spu import LOAD_FUNCS, get_spu
 from src.utils import get_df_categories, subdf_by_categories
@@ -195,7 +197,7 @@ def data_for_fit(compile_data, x_setting, y_setting, dates=None, stack_roll=Fals
         x, y = compile_data.gen_x_y_for_model(x_setting, y_setting, dates)
 
     # print data setting
-    if verbose > 0:
+    if verbose > 1:
         s = ('data setting:\n'
              '\t- y: {y}\n'
              '\t- x: {x}\n'.format(x=x_setting, y=y_setting))
@@ -238,7 +240,7 @@ def eval(compile_data, train_roller, eval_roller, model, evaluators, refit=False
 if __name__ == '__main__':
     import os
     from sklearn.svm import SVR
-    from src.utils.metric_single_num import mse_wrap, r2_wrap
+    from src.utils.metric_single_num import metrics
 
     if os.getcwd().endswith('src'):
         os.chdir('..')
@@ -266,9 +268,9 @@ if __name__ == '__main__':
                         verbose=V)
 
     M.fit(X, Y)
-    print('training score: ', mse_wrap(Y, M.predict(X)))
+    print('training score: ', M.score(X, Y))
 
     E_R = Rolling(rsd='2016-07-01', red='2017-07-01', rstep=7, tw_past=60, tw_pred=7)
 
-    EVTORS = [mse_wrap, r2_wrap]
+    EVTORS = metrics
     EVAL_RES = eval(D, T_R, E_R, M, EVTORS, refit=False)
