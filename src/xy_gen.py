@@ -24,7 +24,7 @@ def prepare_temporal_data_for_model(data, setting, index_order):
     if setting == 'event_cnt':
         prepared = event_cnt(data)
         if index_order is not None:
-            prepared = prepared.loc[index_order].fillna(0)
+            prepared = prepared.reindex(index_order).fillna(0)
         return prepared
     else:
         raise NotImplementedError('No such setting:' + setting)
