@@ -1,3 +1,4 @@
+# DEPRECATED
 from itertools import chain
 
 from src.constants import COL

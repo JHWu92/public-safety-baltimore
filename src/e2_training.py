@@ -1,3 +1,4 @@
+# DEPRECATED
 from src.utils.temporal_roll import Rolling
 
 
