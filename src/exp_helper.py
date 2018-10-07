@@ -262,7 +262,7 @@ if __name__ == '__main__':
     # }
     # M = RandomizedSearchCV(RandomForestRegressor(), param_distributions=PD, n_iter=20, cv=5, verbose=V)
     # M = LinearRegression()
-    M = SVR()
+    M = SVR(gamma='scale')
 
     X, Y = data_for_fit(D, roller=T_R, x_setting='event_cnt', y_setting='event_cnt', stack_roll=False,
                         verbose=V)
