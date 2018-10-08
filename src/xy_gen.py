@@ -20,12 +20,14 @@ def y_cnt_event(spatial_units, coords):
     return y_cnt[C.COL.num_events]
 
 
-def prepare_temporal_data_for_model(data, setting, index_order):
+def prepare_temporal_data_for_model(data, setting, index_order=None):
     if setting == 'event_cnt':
         prepared = event_cnt(data)
         if index_order is not None:
             prepared = prepared.reindex(index_order).fillna(0)
         return prepared
+    elif setting == 'time_indexed_points':
+        return time_indexed_points(data)
     else:
         raise NotImplementedError('No such setting:' + setting)
 
@@ -35,12 +37,12 @@ def event_cnt(data):
 
     :param data: dict
         key: dname, value: dataframe with spu_assignment
-    :param spu_name: spatial unit
     :return: pd.DataFrame
         index.name = constants.COL.spu
         columns = dnames
     """
     cnts = []
+    # get a column per dname
     for dname, df in data.items():
         cnt = df.groupby(C.COL.spu).size()
         cnt.name = dname
@@ -49,3 +51,31 @@ def event_cnt(data):
     if isinstance(cnts, pd.Series):
         cnts = cnts.to_frame()
     return cnts
+
+
+def time_indexed_points(data):
+    """
+
+    :param data: dict
+        key: dname, value: dataframe with spu_assignment
+    :return: dict
+        key: dname, value: pd.Series of coords of points
+    """
+    points = {dname: df[C.COL.coords] for dname, df in data.items()}
+    return points
+
+
+if __name__ == '__main__':
+    from src.exp_helper import CompileData
+    import os
+
+    if os.getcwd().endswith('src'):
+        os.chdir('..')
+    print(os.getcwd())
+
+    D = CompileData(spu_name='grid_1000')
+    D.set_x(['crime'], by_category=True)
+    D.set_y('crime/burglary')
+
+    data_x_past = D.data_x.slice_data('2015-01-01', '2015-01-03')
+    x = prepare_temporal_data_for_model(data_x_past, setting='time_indexed_points')
