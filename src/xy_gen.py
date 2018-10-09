@@ -20,23 +20,27 @@ def y_cnt_event(spatial_units, coords):
     return y_cnt[C.COL.num_events]
 
 
-def prepare_temporal_data_for_model(data, setting, index_order=None):
+def prepare_temporal_data_for_model(data, setting, spu=None):
     if setting == 'event_cnt':
-        prepared = event_cnt(data)
-        if index_order is not None:
-            prepared = prepared.reindex(index_order).fillna(0)
-        return prepared
+        return event_cnt(data, spu=spu)
     elif setting == 'time_indexed_points':
         return time_indexed_points(data)
+    elif setting.startswith('hot_spot'):
+        if '/' not in setting:
+            raise ValueError('please specify the kind of hot spots with a /')
+        kind = setting.split('/')[1]
+        return hot_spot_cls(data, kind, spu=spu)
     else:
         raise NotImplementedError('No such setting:' + setting)
 
 
-def event_cnt(data):
+def event_cnt(data, spu=None):
     """
 
     :param data: dict
         key: dname, value: dataframe with spu_assignment
+    :param spu: Dataframe, default None
+        spatial unit used to reindex event_cnt if not None
     :return: pd.DataFrame
         index.name = constants.COL.spu
         columns = dnames
@@ -50,6 +54,9 @@ def event_cnt(data):
     cnts = pd.concat(cnts, axis=1)
     if isinstance(cnts, pd.Series):
         cnts = cnts.to_frame()
+
+    if spu is not None:
+        cnts = cnts.reindex(spu.index).fillna(0)
     return cnts
 
 
@@ -65,6 +72,19 @@ def time_indexed_points(data):
     return points
 
 
+def hot_spot_cls(data, kind='mean', spu=None):
+    cnts = event_cnt(data, spu=spu)
+    if kind == 'mean':
+        hot_spot = cnts.apply(lambda c: c > c.mean()).astype(int)
+    elif kind == 'mean+std':
+        hot_spot = cnts.apply(lambda c: c > (c.mean() + c.std())).astype(int)
+    elif kind == 'median':
+        hot_spot = cnts.apply(lambda c: c > (c.median())).astype(int)
+    else:
+        raise ValueError('hotspot cls: kind=%s is not supported' % kind)
+    return hot_spot
+
+
 if __name__ == '__main__':
     from src.exp_helper import CompileData
     import os
@@ -78,4 +98,9 @@ if __name__ == '__main__':
     D.set_y('crime/burglary')
 
     data_x_past = D.data_x.slice_data('2015-01-01', '2015-01-03')
+    data_y_past = D.data_y.slice_data('2015-01-01', '2015-01-03')
     x = prepare_temporal_data_for_model(data_x_past, setting='time_indexed_points')
+    y = prepare_temporal_data_for_model(data_y_past, setting='hot_spot/mean')
+    y2 = prepare_temporal_data_for_model(data_y_past, setting='event_cnt', spu=D.spu)
+    y4 = prepare_temporal_data_for_model(data_y_past, setting='hot_spot/mean', spu=D.spu)
+    y3 = prepare_temporal_data_for_model(data_y_past, setting='event_cnt')
