@@ -17,7 +17,7 @@ def get_distance(row):
 
 def calc_risk(df, grid_size, now_date):
     distance = df.apply(get_distance, axis=1) // (grid_size / 2) + 1
-    n_weeks = df.Date.apply(lambda x: (now_date - x).days // 7 + 1)
+    n_weeks = df[C.COL.datetime].apply(lambda x: (now_date - x).days // 7 + 1)
     return (1 / distance * 1 / n_weeks).sum()
 
 
@@ -78,16 +78,16 @@ class Bower:
 
         if self.tw is not None:
             if last_date is None:
-                last_date = x_coords.index.max()
-                if self.verbose > 0:
-                    print('last_date is None, using coords.index.max()=%s as last_date' % (
-                        last_date.strftime('%Y-%m-%d')))
+                last_date = x_coords.index.max().normalize() + datetime.timedelta(days=1, seconds=-1)
             elif isinstance(last_date, str):
-                last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d')
+                last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d') + datetime.timedelta(seconds=-1)
+            if self.verbose > 0:
+                print('last_date = %s' % last_date)
 
             # pandas time index slice include both begin and last date,
             # to have a time window=tw, the difference should be tw-1
-            begin_date = last_date - datetime.timedelta(days=self.tw - 1)
+            # the above is wrong, since we're using datetime. down to the last sec
+            begin_date = last_date - datetime.timedelta(days=self.tw)
             x_coords = x_coords.loc[begin_date:last_date]
             self.last_date = last_date
 
@@ -100,18 +100,18 @@ class Bower:
 
         :param spatial_units: assuming coords of the centers. pd.Series([coord], index=Date)
         :param now_date: Datetime-like object, default None
-            now_date for the prediction. If None, now_date=self.last_date+1day
+            now_date for the prediction. If None, now_date=self.last_date+1sec
         :return: pd.Series, index=data.index, value=risk score
         """
         # TODO spatial_units can be shapes other than grids
 
         if now_date is None:
-            now_date = self.last_date + datetime.timedelta(days=1)
+            now_date = self.last_date + datetime.timedelta(seconds=1)
             if self.verbose > 0:
-                print('now_date is None, using self.last_date+1day=%s as now_date' % now_date.strftime('%Y-%m-%d'))
+                print('now_date is None, using self.last_date+1sec=%s as now_date' % now_date)
 
         # grids_center has same index as coords
-        grids = gp.GeoDataFrame(spatial_units)
+        grids = gp.GeoDataFrame(spatial_units.values)
         grids.columns = ['cen_coords']
         grids['geometry'] = grids.cen_coords.apply(lambda x: Point(*x))
         grids['geometry'] = grids.buffer(self.bw)

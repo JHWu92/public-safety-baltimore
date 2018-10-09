@@ -13,7 +13,6 @@ from sklearn.neighbors import KernelDensity
 from src import constants as C
 
 
-
 class KDE:
     def __str__(self):
         return 'KDE(bandwidth={}, timewindow={}, verbose={})'.format(self.bw, self.tw, self.verbose)
@@ -33,12 +32,11 @@ class KDE:
 
     def get_last_date(self, coords, last_date):
         if last_date is None:
-            last_date = coords.index.max()
-            if self.verbose > 0:
-                print('last_date is None, using coords.index.max()=%s as last_date' % (
-                    last_date.strftime('%Y-%m-%d')))
+            last_date = coords.index.max().normalize() + datetime.timedelta(days=1, seconds=-1)
         elif isinstance(last_date, str):
-            last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d')
+            last_date = datetime.datetime.strptime(last_date, '%Y-%m-%d') + datetime.timedelta(seconds=-1)
+        if self.verbose > 0:
+            print('last_date = %s' % last_date)
         return last_date
 
     def fit(self, x_coords, y_coords=None, last_date=None):
