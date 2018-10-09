@@ -172,8 +172,8 @@ class CompileData:
         # F(x_past) = y_pred
         data_x_past = self.data_x.slice_data(past_sd, past_ed)
         data_y_pred = self.data_y.slice_data(pred_sd, pred_ed)
-        x = prepare_temporal_data_for_model(data_x_past, setting=x_setting, index_order=self.spu.index)
-        y = prepare_temporal_data_for_model(data_y_pred, setting=y_setting, index_order=self.spu.index)
+        x = prepare_temporal_data_for_model(data_x_past, setting=x_setting, spu=self.spu)
+        y = prepare_temporal_data_for_model(data_y_pred, setting=y_setting, spu=self.spu)
         if y.shape[1] > 1:
             raise NotImplementedError('Multiple Y not implemented')
         # TODO: add context to x
@@ -209,11 +209,15 @@ def data_for_fit(compile_data, x_setting, y_setting, dates=None, stack_roll=Fals
             s += '\t- %s' % str(roller).replace('\t', '\t\t')
         print(s.strip())
 
+    if not isinstance(x, dict):
+        x = x.values
+
     # .ravel(): change the shape of y from column vector to row vector
-    return x.values, y.values.ravel()
+    y = y.values.ravel()
+    return x, y
 
 
-def eval(compile_data, train_roller, eval_roller, model, evaluators, refit=False):
+def evaluate(compile_data, train_roller, eval_roller, model, evaluators, refit=False):
     eval_res = []
     tmp_train_roller = copy.copy(train_roller)
     for i, dates in enumerate(eval_roller.roll()):
@@ -273,4 +277,4 @@ if __name__ == '__main__':
     E_R = Rolling(rsd='2016-07-01', red='2017-07-01', rstep=7, tw_past=60, tw_pred=7)
 
     EVTORS = metrics
-    EVAL_RES = eval(D, T_R, E_R, M, EVTORS, refit=False)
+    EVAL_RES = evaluate(D, T_R, E_R, M, EVTORS, refit=False)
