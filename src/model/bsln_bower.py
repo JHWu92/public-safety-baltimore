@@ -95,7 +95,7 @@ class Bower:
             columns={C.COL.coords: 'geometry'}).reset_index()
         self.events = events
 
-    def pred(self, spatial_units, now_date=None):
+    def predict(self, spatial_units, now_date=None):
         """
 
         :param spatial_units: assuming coords of the centers. pd.Series([coord], index=Date)

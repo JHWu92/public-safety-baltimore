@@ -70,7 +70,7 @@ class KDE:
         kde.fit(x_coords.tolist())
         self.estimator = kde
 
-    def pred(self, data, now_date=None):
+    def predict(self, data, now_date=None):
         """
 
         :param coords: pd.Series
