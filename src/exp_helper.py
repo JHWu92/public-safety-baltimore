@@ -217,25 +217,28 @@ def data_for_fit(compile_data, x_setting, y_setting, dates=None, stack_roll=Fals
     return x, y
 
 
-def evaluate(compile_data, train_roller, eval_roller, model, evaluators, refit=False):
+def evaluate(compile_data, train_roller, eval_roller, model, evaluators, refit=False,
+             x_setting='event_cnt', y_setting='event_cnt', verbose=0, debug=False):
     eval_res = []
     tmp_train_roller = copy.copy(train_roller)
     for i, dates in enumerate(eval_roller.roll()):
         past_sd, past_ed, pred_sd, pred_ed = dates
-        res = {'period': 'X: %s~%s -> Y: %s~%s' % (past_sd, past_ed, pred_sd, pred_ed)}
-        if refit and i != 0:
+        period = 'X: %s~%s -> Y: %s~%s' % (past_sd, past_ed, pred_sd, pred_ed)
+        res = {'period': period}
+        if refit:
             tmp_train_roller.red = past_sd
-            X, Y = data_for_fit(compile_data, roller=tmp_train_roller, x_setting='event_cnt', y_setting='event_cnt',
-                                stack_roll=False, verbose=V)
+            X, Y = data_for_fit(compile_data, roller=tmp_train_roller, x_setting=x_setting, y_setting=y_setting,
+                                stack_roll=False, verbose=verbose)
             model.fit(X, Y)
-        eval_x, eval_y = data_for_fit(compile_data, x_setting='event_cnt', y_setting='event_cnt', dates=dates,
-                                      verbose=V)
+        eval_x, eval_y = data_for_fit(compile_data, x_setting=x_setting, y_setting=y_setting, dates=dates,
+                                      verbose=verbose)
         pred_y = model.predict(eval_x)
+
         for e in evaluators:
             res[e.__name__] = e(eval_y, pred_y, compile_data.spu)
 
         eval_res.append(res)
-        if i > 3:
+        if i > 3 and debug:
             break
 
     return pd.DataFrame(eval_res)
