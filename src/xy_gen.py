@@ -1,7 +1,7 @@
 import geopandas as gp
 import pandas as pd
 from shapely.geometry import Point
-
+import numpy as np
 from src import constants as C
 from src.utils import str_is_float
 
@@ -74,23 +74,29 @@ def time_indexed_points(data):
 
 
 def hot_spot_cls(data, kind='mean', spu=None):
-    cnts = event_cnt(data, spu=spu)
-
-    if str_is_float(kind):
-        kind = float(kind)
-        if kind > 1 or kind <= 0:
-            raise ValueError('kind should be >0 or <1')
-        thres = cnts.max() - kind * (cnts.max() - cnts.min())
-        hot_spot = (cnts > thres).astype(int)
-    else:
-        if kind == 'mean':
-            hot_spot = cnts.apply(lambda c: c > c.mean()).astype(int)
-        elif kind == 'mean+std':
-            hot_spot = cnts.apply(lambda c: c > (c.mean() + c.std())).astype(int)
-        elif kind == 'median':
-            hot_spot = cnts.apply(lambda c: c > (c.median())).astype(int)
+    if isinstance(data, np.ndarray):
+        if str_is_float(kind):
+            kind = float(kind)
+            if kind > 1 or kind <= 0:
+                raise ValueError('kind should be >0 or <1')
+            thres = data.max() - kind * (data.max() - data.min())
+            hot_spot = (data > thres).astype(int)
         else:
-            raise ValueError('hotspot cls: kind=%s is not supported' % kind)
+            if kind == 'mean':
+                hot_spot = (data>data.mean()).astype(int)
+            elif kind == 'mean+std':
+                hot_spot = (data > (data.mean() + data.std())).astype(int)
+            elif kind == 'median':
+                hot_spot = (data > np.median(data)).astype(int)
+            else:
+                raise ValueError('hotspot cls: kind=%s is not supported' % kind)
+    elif isinstance(data, dict):
+        cnts = event_cnt(data, spu=spu)
+        for i in range(cnts.shape[1]):
+            cnts.iloc[:, i] = hot_spot_cls(cnts.iloc[:, i].values, kind=kind, spu=spu)
+        hot_spot = cnts
+    else:
+        raise ValueError('type(data) should be either dict or np.ndarray')
     return hot_spot
 
 
@@ -110,6 +116,7 @@ if __name__ == '__main__':
     data_y_past = D.data_y.slice_data('2015-01-01', '2015-01-03')
     x = prepare_temporal_data_for_model(data_x_past, setting='time_indexed_points')
     y = prepare_temporal_data_for_model(data_y_past, setting='hot_spot/mean')
+    y3 = prepare_temporal_data_for_model(data_y_past, setting='event_cnt')
     y2 = prepare_temporal_data_for_model(data_y_past, setting='event_cnt', spu=D.spu)
     y4 = prepare_temporal_data_for_model(data_y_past, setting='hot_spot/mean', spu=D.spu)
-    y3 = prepare_temporal_data_for_model(data_y_past, setting='event_cnt')
+    y5 = prepare_temporal_data_for_model(data_y_past, setting='hot_spot/0.2', spu=D.spu)
