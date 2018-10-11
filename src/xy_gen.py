@@ -3,6 +3,7 @@ import pandas as pd
 from shapely.geometry import Point
 
 from src import constants as C
+from src.utils import str_is_float
 
 
 def y_cnt_event(spatial_units, coords):
@@ -74,14 +75,22 @@ def time_indexed_points(data):
 
 def hot_spot_cls(data, kind='mean', spu=None):
     cnts = event_cnt(data, spu=spu)
-    if kind == 'mean':
-        hot_spot = cnts.apply(lambda c: c > c.mean()).astype(int)
-    elif kind == 'mean+std':
-        hot_spot = cnts.apply(lambda c: c > (c.mean() + c.std())).astype(int)
-    elif kind == 'median':
-        hot_spot = cnts.apply(lambda c: c > (c.median())).astype(int)
+
+    if str_is_float(kind):
+        kind = float(kind)
+        if kind > 1 or kind <= 0:
+            raise ValueError('kind should be >0 or <1')
+        thres = cnts.max() - kind * (cnts.max() - cnts.min())
+        hot_spot = (cnts > thres).astype(int)
     else:
-        raise ValueError('hotspot cls: kind=%s is not supported' % kind)
+        if kind == 'mean':
+            hot_spot = cnts.apply(lambda c: c > c.mean()).astype(int)
+        elif kind == 'mean+std':
+            hot_spot = cnts.apply(lambda c: c > (c.mean() + c.std())).astype(int)
+        elif kind == 'median':
+            hot_spot = cnts.apply(lambda c: c > (c.median())).astype(int)
+        else:
+            raise ValueError('hotspot cls: kind=%s is not supported' % kind)
     return hot_spot
 
 
