@@ -73,30 +73,42 @@ def time_indexed_points(data):
     return points
 
 
-def hot_spot_cls(data, kind='mean', spu=None):
+def hot_spot_cls(data, kind='mean', spu=None, to_int=True):
+    """
+
+    :param data:
+    :param kind: str
+        mean, mean+std, median: True if data>mean/mean+std/median;
+        float: True if data is within the top float percentile.
+    :param spu:
+    :param to_int:
+    :return:
+    """
     if isinstance(data, np.ndarray):
         if str_is_float(kind):
             kind = float(kind)
             if kind > 1 or kind <= 0:
                 raise ValueError('kind should be >0 or <1')
             thres = data.max() - kind * (data.max() - data.min())
-            hot_spot = (data > thres).astype(int)
+            hot_spot = (data > thres)
         else:
             if kind == 'mean':
-                hot_spot = (data>data.mean()).astype(int)
+                hot_spot = (data > data.mean())
             elif kind == 'mean+std':
-                hot_spot = (data > (data.mean() + data.std())).astype(int)
+                hot_spot = (data > (data.mean() + data.std()))
             elif kind == 'median':
-                hot_spot = (data > np.median(data)).astype(int)
+                hot_spot = (data > np.median(data))
             else:
                 raise ValueError('hotspot cls: kind=%s is not supported' % kind)
     elif isinstance(data, dict):
         cnts = event_cnt(data, spu=spu)
         for i in range(cnts.shape[1]):
-            cnts.iloc[:, i] = hot_spot_cls(cnts.iloc[:, i].values, kind=kind, spu=spu)
+            cnts.iloc[:, i] = hot_spot_cls(cnts.iloc[:, i].values, kind=kind, spu=spu, to_int=to_int)
         hot_spot = cnts
     else:
         raise ValueError('type(data) should be either dict or np.ndarray')
+    if to_int:
+        hot_spot = hot_spot.astype(int)
     return hot_spot
 
 
