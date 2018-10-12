@@ -16,10 +16,10 @@ def hit_rate(y_true, y_pred, spu=None):
 
 
 def search_efficient_rate(y_true, y_pred, spu):
-    hit = hit_rate(y_true,y_pred,spu)
     mask = y_pred.astype(bool)
+    y_true_in_pred = y_true[mask]
     area = spu.loc[mask][COL.area].sum() * 1e-6
-    return hit/area
+    return y_true_in_pred.sum()/area
 
 
 def prediction_accuracy_index(y_true, y_pred, spu):
