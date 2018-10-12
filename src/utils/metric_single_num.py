@@ -5,13 +5,28 @@ import numpy as np
 from src.xy_gen import hot_spot_cls
 from .metric_roc_like import (search_efficient_rate_upct_wrap, prediction_accuracy_index_upct_wrap,
                               area_to_perimeter_ratio_upct_wrap, hit_rate_upct_wrap)
+from src.constants import COL
 
 
 def hit_rate(y_true, y_pred, spu=None):
     """for 2-class classification only, y_pred is cast to a bool arr as mask for y_true"""
-    y_pred = y_pred.astype(bool)
-    y_true_in_pred = y_true[y_pred]
+    mask = y_pred.astype(bool)
+    y_true_in_pred = y_true[mask]
     return y_true_in_pred.sum()/y_true.sum()
+
+
+def search_efficient_rate(y_true, y_pred, spu):
+    hit = hit_rate(y_true,y_pred,spu)
+    mask = y_pred.astype(bool)
+    area = spu.loc[mask][COL.area].sum() * 1e-6
+    return hit/area
+
+
+def prediction_accuracy_index(y_true, y_pred, spu):
+    hit = hit_rate(y_true,y_pred,spu)
+    mask = y_pred.astype(bool)
+    area_pcnt = spu.loc[mask][COL.area].sum()/spu[COL.area].sum()
+    return hit/area_pcnt
 
 
 def rmse(y_true, y_pred, spu=None):
