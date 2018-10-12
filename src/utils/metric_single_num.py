@@ -1,8 +1,17 @@
 from sklearn.metrics import mean_absolute_error, r2_score, auc, mean_squared_error
 from math import sqrt
 from . import p2f
+import numpy as np
+from src.xy_gen import hot_spot_cls
 from .metric_roc_like import (search_efficient_rate_upct_wrap, prediction_accuracy_index_upct_wrap,
                               area_to_perimeter_ratio_upct_wrap, hit_rate_upct_wrap)
+
+
+def hit_rate(y_true, y_pred, spu=None):
+    """for 2-class classification only, y_pred is cast to a bool arr as mask for y_true"""
+    y_pred = y_pred.astype(bool)
+    y_true_in_pred = y_true[y_pred]
+    return y_true_in_pred.sum()/y_true.sum()
 
 
 def rmse(y_true, y_pred, spu=None):
