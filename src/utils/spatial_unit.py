@@ -1,6 +1,10 @@
+import os
+
 import geopandas as gp
+import pandas as pd
 
 from src import constants as C
+from src.e0_load_tr_de_spu import get_spu
 
 
 def get_grids(shape, grid_side=200, crs=None):
@@ -27,7 +31,7 @@ def get_grids(shape, grid_side=200, crs=None):
     else:
         raise ValueError('shape is not bbox tuple, closed LineString or Polygon')
 
-    grid_lon, grid_lat = np.mgrid[lon_min:lon_max+grid_side:grid_side, lat_min:lat_max+grid_side:grid_side]
+    grid_lon, grid_lat = np.mgrid[lon_min:lon_max + grid_side:grid_side, lat_min:lat_max + grid_side:grid_side]
     grids_poly = []
 
     for j in range(grid_lat.shape[1] - 1):
@@ -57,9 +61,46 @@ def baltimore_grids(grid_side=200, cityline_path=None):
     return grids
 
 
+def get_grid2nbh_ratio(grid_name, nbh_name, to_csv=False):
+    grid = get_spu(grid_name)
+    nbh_all = get_spu(nbh_name)
+    joined = gp.sjoin(grid, nbh_all)
+    pairs = joined['index_right'].reset_index()
+    num_bh_per_grid = pairs.groupby('index').size()
+    ratio = pairs[pairs['index'].isin(num_bh_per_grid[num_bh_per_grid == 1].index)].copy()
+    ratio.columns = ['grid', 'nbh']
+    ratio['ratio'] = 1
+    more_ratio = []
+    for gidx in num_bh_per_grid[num_bh_per_grid != 1].index:
+        g = grid.loc[gidx].geometry
+        garea = g.area
+        for nbhidx in pairs[pairs['index'] == gidx].index_right.values:
+            nbh = nbh_all.loc[nbhidx].geometry
+            more_ratio.append({'grid': gidx, 'nbh': nbhidx, 'ratio': g.intersection(nbh).area / garea})
+    #     break
+    more_ratio_df = pd.DataFrame(more_ratio)
+    ratio = ratio.append(more_ratio_df, ignore_index=True)
+    if to_csv:
+        ratio.to_csv('data/spu/%s_to_%s.csv' % (grid_name, nbh_name))
+    return ratio
+
+
+def grid2nbh(grid_stats, grid_name='grid_50', nbh_name='bnia_nbh', kind='sum'):
+    path = 'data/spu/%s_to_%s.csv' % (grid_name, nbh_name)
+    if os.path.exists(path):
+        ratio = pd.read_csv(path, index_col=0)
+    else:
+        ratio = get_grid2nbh_ratio(grid_name, nbh_name, to_csv=True)
+    # print(ratio)
+    stats = grid_stats.to_frame().merge(ratio, left_index=True, right_on='grid')
+    if kind == 'count':
+        stats['stat'] = stats.iloc['stat'] > 1e-7
+    stats = stats.groupby('nbh').apply(lambda x: sum(x.stat * x.ratio))
+    return stats.reindex(get_spu(nbh_name).index)
+
+
 def main():
-    import pandas as pd
-    grids = baltimore_grids(cityline_path='../'+C.Path_shape.cityline)
+    grids = baltimore_grids(cityline_path='../' + C.Path_shape.cityline)
     # print(grids.head())
     print(pd.DataFrame([grids.Area, grids.Cen_coords]).T.head())
     a = grids.Area
