@@ -130,5 +130,63 @@ class DateTimeRelated:
     test_ed = dt.strptime('2018-07-01', date_format)
 
 
-if __name__ == '__main__':
-    print(DateTimeRelated.train_sd, type(DateTimeRelated.train_sd))
+class BniaIndicators:
+    population = ('Total Population')
+    population_break_down = (
+        'Total Male Population', 'Total Female Population',
+        'Percent of Residents - Black/African-American (Non-Hispanic)',
+        'Percent of Residents - White/Caucasian (Non-Hispanic)', 'Percent of Residents - Asian (Non-Hispanic)',
+        'Percent of Residents - Two or More Races (Non-Hispanic)',
+        'Percent of Residents - All Other Races (Hawaiian/ Pacific Islander, Alaskan/ Native American Other Race) (Non-Hispanic)',
+        'Percent of Residents - Hispanic', 'Racial Diversity Index', 'Percent of Population Under 5 Years old',
+        'Percent of Population 5-17 Years old', 'Percent of Population 18-24 Years old',
+        'Percent of Population 25-64 Years old', 'Percent of Population 65 Years and over')
+    household_size = ('Total Number of Households', 'Percent of Female-Headed Households with Children Under 18',
+                      'Percent of Households with Children Under 18', 'Average Household Size')
+    household_income = ('Median Household Income', 'Percent of Households Earning Less than $25,000',
+                        'Percent of Households Earning $25,000 to $40,000',
+                        'Percent of Households Earning $40,000 to $60,000',
+                        'Percent of Households Earning $60,000 to $75,000',
+                        'Percent of Households Earning More than $75,000',
+                        'Percent of Family Households Living Below the Poverty Line',
+                        'Percent of Children Living Below the Poverty Line',)
+    housing = ('Median Price of Homes Sold', 'Median Number of Days on the Market', 'Number of Homes Sold',
+               'Percentage of Housing Units that are Owner-Occupied',
+               'Percentage of Properties Under Mortgage Foreclosure',
+               'Percentage of Residential Properties that are Vacant and Abandoned',
+               'Percentage of Residential Properties with Housing Violations (Excluding Vacants)',
+               'Percentage of Properties with Rehabilitation Permits Exceeding $5,000',
+               'Total Number of Residential Properties', 'Percentage of Residential Sales for Cash',
+               'Percentage of Residential Sales in Foreclosure (REO)', 'Percentage of Residential Tax Lien Sales',
+               'Number of Demolition Permits per 1,000 Residential Properties',
+               'Number of New Construction Permits per 1,000 Residential Properties',
+               'Percentage of Vacant Properties Owned by Baltimore City', 'Affordability Index - Mortgage',
+               'Affordability Index - Rent', 'Number of Historic Tax Credits per 1,000 Residential Units',
+               'Number of Homestead Tax Credits per 1,000 Residential Units',
+               'Number of Homeowner\'s Tax Credits per 1, 000 Residential Units',
+               'Percent Residential Properties that do Not Receive Mail',)
+
+    education = ('Number of Students Ever Attended 1st - 5th Grade', 'Number of Students Ever Attended 6th - 8th Grade',
+                 'Number of Students Ever Attended 9th - 12th Grade',
+                 'Percent of Students that are African American (non-Hispanic)',
+                 'Percent of Students that are White (non-Hispanic)', 'Percent of Students that are Hispanic',
+                 'Percent of 1st-5th Grade Students that are Chronically Absent (Missing at least 20 days)',
+                 'Percent of 6th-8th Grade Students that are Chronically Absent (Missing at least 20 days)',
+                 'Percent of 9th-12th Grade Students that are Chronically Absent (Missing at least 20 days)',
+                 'Percentage of Students Suspended or Expelled During School Year',
+                 'Percentage of Students Receiving Free or Reduced Meals',
+                 'Percentage of Students Enrolled in Special Education Programs', 'Kindergarten School Readiness',
+                 'Percentage of 3rd Grade Students Passing MSA Math',
+                 'Percentage of 3rd Grade Students Passing MSA Reading',
+                 'Percentage of 5th Grade Students Passing MSA Math',
+                 'Percentage of 5th Grade Students Passing MSA Reading',
+                 'Percentage of 8th Grade Students Passing MSA Math',
+                 'Percentage of 8th Grade Students Passing MSA Reading',
+                 'Percentage of Students Passing H.S.A. English ', 'Percentage of Students Passing H.S.A. Biology',
+                 'Percentage of Students Passing H.S.A. Government', 'Percentage of Students Passing H.S.A. Algebra',
+                 'High School Dropout/Withdrawl Rate', 'High School Completion Rate',
+                 'Percent of Students Switching Schools within School Year',
+                 'Percentage of Population aged 16-19 in School and/or Employed')
+
+    if __name__ == '__main__':
+        print(DateTimeRelated.train_sd, type(DateTimeRelated.train_sd))
