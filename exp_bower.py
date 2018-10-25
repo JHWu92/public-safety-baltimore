@@ -63,22 +63,27 @@ def get_pred(compile_data, train_roller, eval_roller, kde, bower, refit=False,
 
         if i % 5 == 0:
             print('beginning the %dth periods' % i, str(datetime.datetime.now()))
-        if refit:
-            if verbose > 1:
-                print('refitting for evaluate period:', period)
-            tmp_train_roller.red = past_sd
-            train_x, train_y = data_for_fit(compile_data, roller=tmp_train_roller, x_setting=x_setting,
-                                            y_setting=y_setting,
-                                            stack_roll=False, verbose=verbose)
-            kde.fit(train_x)
-            bower.fit(train_x)
-            if verbose > 1:
-                print('model fit')
+        # if refit:
+        #     if verbose > 1:
+        #         print('refitting for evaluate period:', period)
+        #     tmp_train_roller.red = past_sd
+        #     train_x, train_y = data_for_fit(compile_data, roller=tmp_train_roller, x_setting=x_setting,
+        #                                     y_setting=y_setting,
+        #                                     stack_roll=False, verbose=verbose)
+        #     kde.fit(train_x)
+        #     bower.fit(train_x)
+        #     if verbose > 1:
+        #         print('model fit')
 
         eval_x, eval_y = data_for_fit(compile_data, x_setting=x_setting, y_setting=y_setting, dates=dates,
                                       verbose=verbose)
 
         pred_res[period]['true_y'] = eval_y
+
+        if verbose > 0:
+            print('fitting kde, bower on X: %s~%s' % (past_sd, past_ed))
+        kde200.fit(eval_x)
+        bower.fit(eval_x)
 
         if verbose > 1:
             print('predicting for each grid_center')
