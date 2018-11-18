@@ -136,15 +136,22 @@ def bnia_stats(pred_res, data, xday):
 print('EXP with 2day')
 pred_res_2d = get_pred(d_bower, tr_bower_2, er_bower_2, kde200, bower, refit=True,
                        x_setting='time_indexed_points', y_setting='event_cnt', debug=False, verbose=0)
-eval_res_2d = get_eval(pred_res_2d)
-pd.DataFrame(eval_res_2d).to_csv('exp_res/bower_2day.csv')
-bnia_stats(pred_res_2d, d_bower, 2)
+
+pd.DataFrame.from_dict(pred_res_2d['bower'].to_dict()).to_sparse(fill_value=0).to_pickle('exp_res/bower_2day_raw_bower.pickle')
+pd.DataFrame.from_dict(pred_res_2d['true_y'].to_dict()).to_sparse(fill_value=0).to_pickle('exp_res/bower_2day_raw_y.pickle')
+pd.DataFrame.from_dict(pred_res_2d['kde200'].to_dict()).to_pickle('exp_res/bower_2day_raw_kde200.pickle')
+# eval_res_2d = get_eval(pred_res_2d)
+# pd.DataFrame(eval_res_2d).to_csv('exp_res/bower_2day.csv')
+# bnia_stats(pred_res_2d, d_bower, 2)
 
 # In[ ]:
 
 print('EXP with 7day')
 pred_res_7d = get_pred(d_bower, tr_bower_7, er_bower_7, kde200, bower, refit=True,
                        x_setting='time_indexed_points', y_setting='event_cnt', debug=False, verbose=0)
-eval_res_7d = get_eval(pred_res_7d)
-pd.DataFrame(eval_res_7d).to_csv('exp_res/bower_7day.csv')
-bnia_stats(pred_res_7d, d_bower, 7)
+pd.DataFrame.from_dict(pred_res_7d['bower'].to_dict()).to_sparse(fill_value=0).to_pickle('exp_res/bower_7day_raw_bower.pickle')
+pd.DataFrame.from_dict(pred_res_7d['true_y'].to_dict()).to_sparse(fill_value=0).to_pickle('exp_res/bower_7day_raw_y.pickle')
+pd.DataFrame.from_dict(pred_res_7d['kde200'].to_dict()).to_pickle('exp_res/bower_7day_raw_kde200.pickle')
+# eval_res_7d = get_eval(pred_res_7d)
+# pd.DataFrame(eval_res_7d).to_csv('exp_res/bower_7day.csv')
+# bnia_stats(pred_res_7d, d_bower, 7)
