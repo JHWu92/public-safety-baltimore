@@ -112,6 +112,7 @@ def get_eval(pred_res):
     return eval_res
 
 
+# TODO intended to move to exp_bower2bnia_stats.py, but haven't adatped the code to that formate
 def bnia_stats(pred_res, data, xday):
     top20 = lambda x: x > np.percentile(x, 80)
     above_mean = lambda x: x > x.mean()
