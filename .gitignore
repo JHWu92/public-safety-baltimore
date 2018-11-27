@@ -1,4 +1,4 @@
-# pycharm
+﻿# pycharm
 .idea/
 
 # Byte-compiled / optimized / DLL files
@@ -152,3 +152,4 @@ tmp/
 tmp.ipynb
 data/spu/assignment_crime-dev.csv
 data/spu/assignment_crime-train.csv
+exp_res/*.pickle

@@ -48,7 +48,7 @@ def bnia_fpn(data, ys, bower, kde200, xday=2, save_file=True):
             # TODO update the file path once the exp is done
             if save_file:
                 pd.DataFrame.from_dict(fpn_res, 'index').to_csv(
-                    'tmp/bower_%dday_bnia_%s_hotspots_%s.csv' % (xday, hname, fname))
+                    'exp_res/bower_%dday_bnia_%s_hotspots_%s.csv' % (xday, hname, fname))
 
 
 grid_size = 50
@@ -59,7 +59,7 @@ d_bower.set_x(['crime'], category_groups={'crime': [['burglary']]}, by_category=
 d_bower.set_y('crime/burglary')
 
 # TODO update file paths once the exp is done on the server
-bower_2d = pd.read_pickle('tmp/bower.pickle').to_dense()
-ys_2d = pd.read_pickle('tmp/true_y.pickle').to_dense()
-kde200_2d = pd.read_pickle('tmp/kde.pickle')
+bower_2d = pd.read_pickle('exp_res/bower_2day_raw_bower.pickle').to_dense()
+ys_2d = pd.read_pickle('exp_res/bower_2day_raw_y.pickle').to_dense()
+kde200_2d = pd.read_pickle('exp_res/bower_2day_raw_kde200.pickle')
 bnia_fpn(d_bower, ys_2d, bower_2d, kde200_2d, 2, save_file=True)
