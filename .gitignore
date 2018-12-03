@@ -153,3 +153,4 @@ tmp.ipynb
 data/spu/assignment_crime-dev.csv
 data/spu/assignment_crime-train.csv
 exp_res/*.pickle
+jupyter-8889
