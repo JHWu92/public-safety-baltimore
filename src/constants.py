@@ -131,17 +131,23 @@ class DateTimeRelated:
 
 
 class BniaIndicators:
-    population = ('Total Population')
-    population_break_down = (
-        'Total Male Population', 'Total Female Population',
-        'Percent of Residents - Black/African-American (Non-Hispanic)',
-        'Percent of Residents - White/Caucasian (Non-Hispanic)', 'Percent of Residents - Asian (Non-Hispanic)',
-        'Percent of Residents - Two or More Races (Non-Hispanic)',
-        'Percent of Residents - All Other Races (Hawaiian/ Pacific Islander, Alaskan/ Native American Other Race) (Non-Hispanic)',
-        'Percent of Residents - Hispanic', 'Racial Diversity Index', 'Percent of Population Under 5 Years old',
-        'Percent of Population 5-17 Years old', 'Percent of Population 18-24 Years old',
-        'Percent of Population 25-64 Years old', 'Percent of Population 65 Years and over')
-    household_size = ('Total Number of Households', 'Percent of Female-Headed Households with Children Under 18',
+    population = ('Total Population',)
+
+    age = (
+        'Percent of Population  Under 5 years old', 'Percent of Population 5-17 years old',
+        'Percent of Population 18-24 years old', 'Percent of Population 25-64 years old',
+        'Percent of Population 65 years and over'
+    )
+
+    gender = ('Total Male Population', 'Total Female Population',)
+
+    racial = (
+        'Percent of Residents - Black/African-American', 'Percent of Residents - White/Caucasian',
+        'Percent of Residents - Asian', 'Percent of Residents - Two or More Races',
+        'Percent of Residents - All Other Races (Hawaiian/ Pacific Islander, Alaskan/ Native American Other Race)',
+        'Percent of Residents - Hispanic', 'Racial Diversity Index',
+    )
+    household_size = ('Total Number of Households', 'Percent of Female-Headed Households with Children under 18',
                       'Percent of Households with Children Under 18', 'Average Household Size')
     household_income = ('Median Household Income', 'Percent of Households Earning Less than $25,000',
                         'Percent of Households Earning $25,000 to $40,000',
@@ -163,12 +169,12 @@ class BniaIndicators:
                'Percentage of Vacant Properties Owned by Baltimore City', 'Affordability Index - Mortgage',
                'Affordability Index - Rent', 'Number of Historic Tax Credits per 1,000 Residential Units',
                'Number of Homestead Tax Credits per 1,000 Residential Units',
-               'Number of Homeowner\'s Tax Credits per 1, 000 Residential Units',
+               'Number of Homeowner\'s Tax Credits per 1,000 Residential Units',
                'Percent Residential Properties that do Not Receive Mail',)
 
     education = ('Number of Students Ever Attended 1st - 5th Grade', 'Number of Students Ever Attended 6th - 8th Grade',
                  'Number of Students Ever Attended 9th - 12th Grade',
-                 'Percent of Students that are African American (non-Hispanic)',
+                 'Percent of Students that are African American',
                  'Percent of Students that are White (non-Hispanic)', 'Percent of Students that are Hispanic',
                  'Percent of 1st-5th Grade Students that are Chronically Absent (Missing at least 20 days)',
                  'Percent of 6th-8th Grade Students that are Chronically Absent (Missing at least 20 days)',
@@ -184,9 +190,11 @@ class BniaIndicators:
                  'Percentage of 8th Grade Students Passing MSA Reading',
                  'Percentage of Students Passing H.S.A. English ', 'Percentage of Students Passing H.S.A. Biology',
                  'Percentage of Students Passing H.S.A. Government', 'Percentage of Students Passing H.S.A. Algebra',
-                 'High School Dropout/Withdrawl Rate', 'High School Completion Rate',
+
+                 'High School Dropout/Withdrawal Rate', 'High School Completion Rate',
                  'Percent of Students Switching Schools within School Year',
                  'Percentage of Population aged 16-19 in School and/or Employed')
 
-    if __name__ == '__main__':
-        print(DateTimeRelated.train_sd, type(DateTimeRelated.train_sd))
+
+if __name__ == '__main__':
+    print(DateTimeRelated.train_sd, type(DateTimeRelated.train_sd))
